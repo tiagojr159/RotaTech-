@@ -52,7 +52,15 @@ include __DIR__ . '/includes/header.php';
 <section class="album-feed-grid">
     <?php foreach ($albumFotos as $foto): ?>
         <article class="album-photo-card">
-            <img src="<?= sanitize((string) $foto['imagem']); ?>" alt="<?= sanitize((string) ($foto['user_name'] ?? 'Foto enviada')); ?>">
+            <button
+                type="button"
+                class="album-photo-trigger"
+                data-open-album-photo
+                data-album-photo-src="<?= sanitize((string) $foto['imagem']); ?>"
+                data-album-photo-alt="<?= sanitize((string) ($foto['user_name'] ?? 'Foto enviada')); ?>"
+            >
+                <img src="<?= sanitize((string) $foto['imagem']); ?>" alt="<?= sanitize((string) ($foto['user_name'] ?? 'Foto enviada')); ?>">
+            </button>
             <div class="album-photo-meta">
                 <strong><?= sanitize((string) ($foto['user_name'] ?? 'Visitante')); ?></strong>
                 <small><?= sanitize((string) ($foto['created_at'] ?? 'Agora')); ?></small>
@@ -60,6 +68,17 @@ include __DIR__ . '/includes/header.php';
         </article>
     <?php endforeach; ?>
 </section>
+
+<div class="modal hidden" id="modal-album-photo">
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-content album-photo-modal-content">
+        <div class="album-photo-modal-head">
+            <h3>Visualizar foto</h3>
+            <button type="button" class="btn btn-light" data-close-modal>Fechar</button>
+        </div>
+        <img src="" alt="" id="album-photo-preview">
+    </div>
+</div>
 
 <?php include __DIR__ . '/includes/bottom-nav.php'; ?>
 </main>

@@ -1283,6 +1283,15 @@ textarea::placeholder {
   overflow: hidden;
 }
 
+.album-photo-trigger {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
 .album-photo-card img {
   width: 100%;
   aspect-ratio: 1 / 1;
@@ -1301,6 +1310,32 @@ textarea::placeholder {
 
 .album-photo-meta small {
   color: var(--muted);
+}
+
+.album-photo-modal-content {
+  width: min(94vw, 460px);
+  padding: 14px;
+}
+
+.album-photo-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.album-photo-modal-head h3 {
+  margin: 0;
+  font-size: 26px;
+}
+
+#album-photo-preview {
+  width: 100%;
+  max-height: 72dvh;
+  object-fit: contain;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--card-soft) 84%, black 16%);
 }
 
 .date-line {
@@ -1365,6 +1400,132 @@ textarea::placeholder {
 .empty-card p {
   margin: 0 0 14px;
   color: #5c524c;
+}
+
+.group-share-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.group-share-form label {
+  font-weight: 800;
+  color: var(--secondary);
+}
+
+.group-user-picker {
+  display: grid;
+  gap: 10px;
+}
+
+.group-user-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--input-bg);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.group-user-search-wrap i {
+  color: var(--primary);
+}
+
+.group-user-search-wrap input {
+  border: 0;
+  background: transparent;
+  padding: 14px 0;
+  width: 100%;
+  outline: none;
+}
+
+.group-user-results {
+  display: grid;
+  gap: 10px;
+  max-height: 232px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.group-user-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--card) 90%, var(--primary) 10%);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.group-user-option img {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid color-mix(in srgb, var(--primary) 55%, transparent);
+  background: var(--card-soft);
+}
+
+.group-user-option span {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.group-user-option strong {
+  font-size: 16px;
+}
+
+.group-user-option small {
+  color: var(--muted);
+}
+
+.group-user-selected {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 18%, var(--card)), var(--card-soft));
+  border: 1px solid color-mix(in srgb, var(--primary) 35%, var(--border));
+}
+
+.group-user-selected-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.group-user-selected-copy small {
+  color: var(--muted);
+}
+
+.group-share-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.group-share-grid > div {
+  display: grid;
+  gap: 8px;
+}
+
+@media (min-width: 380px) {
+  .group-share-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .group-share-grid > div:nth-child(3) {
+    grid-column: 1 / -1;
+  }
 }
 
 .export-btn {

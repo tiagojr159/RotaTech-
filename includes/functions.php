@@ -143,6 +143,172 @@ function uploadImage($fieldName): ?string
     return 'uploads/' . $filename;
 }
 
+function normalizeUploadedPhotoOrientation($image, string $filePath, string $ext)
+{
+    if (!function_exists('exif_read_data')) {
+        return $image;
+    }
+
+    if (!in_array($ext, ['jpg', 'jpeg'], true)) {
+        return $image;
+    }
+
+    $exif = @exif_read_data($filePath);
+    $orientation = (int) ($exif['Orientation'] ?? 1);
+
+    $rotated = $image;
+
+    switch ($orientation) {
+        case 2:
+            imageflip($rotated, IMG_FLIP_HORIZONTAL);
+            break;
+        case 3:
+            $candidate = imagerotate($rotated, 180, 0);
+            if ($candidate !== false) {
+                $rotated = $candidate;
+            }
+            break;
+        case 4:
+            imageflip($rotated, IMG_FLIP_VERTICAL);
+            break;
+        case 5:
+            imageflip($rotated, IMG_FLIP_VERTICAL);
+            $candidate = imagerotate($rotated, -90, 0);
+            if ($candidate !== false) {
+                $rotated = $candidate;
+            }
+            break;
+        case 6:
+            $candidate = imagerotate($rotated, -90, 0);
+            if ($candidate !== false) {
+                $rotated = $candidate;
+            }
+            break;
+        case 7:
+            imageflip($rotated, IMG_FLIP_HORIZONTAL);
+            $candidate = imagerotate($rotated, -90, 0);
+            if ($candidate !== false) {
+                $rotated = $candidate;
+            }
+            break;
+        case 8:
+            $candidate = imagerotate($rotated, 90, 0);
+            if ($candidate !== false) {
+                $rotated = $candidate;
+            }
+            break;
+    }
+
+    return $rotated;
+}
+
+function detectFramePhotoWindow($frameImage): array
+{
+    $width = imagesx($frameImage);
+    $height = imagesy($frameImage);
+    $minX = $width;
+    $minY = $height;
+    $maxX = -1;
+    $maxY = -1;
+
+    for ($y = 0; $y < $height; $y++) {
+        for ($x = 0; $x < $width; $x++) {
+            $rgba = imagecolorat($frameImage, $x, $y);
+            $alpha = ($rgba >> 24) & 0x7F;
+            if ($alpha >= 110) {
+                if ($x < $minX) {
+                    $minX = $x;
+                }
+                if ($y < $minY) {
+                    $minY = $y;
+                }
+                if ($x > $maxX) {
+                    $maxX = $x;
+                }
+                if ($y > $maxY) {
+                    $maxY = $y;
+                }
+            }
+        }
+    }
+
+    if ($maxX < 0 || $maxY < 0) {
+        return ['x' => 0, 'y' => 0, 'width' => $width, 'height' => $height];
+    }
+
+    return [
+        'x' => $minX,
+        'y' => $minY,
+        'width' => max(1, $maxX - $minX + 1),
+        'height' => max(1, $maxY - $minY + 1),
+    ];
+}
+
+function encodeCompositeImageToSize($image, string $targetBaseName, int $maxBytes = 204800): ?string
+{
+    $supportsWebp = function_exists('imagewebp');
+    $extension = $supportsWebp ? 'webp' : 'jpg';
+    $target = UPLOADS_PATH . DIRECTORY_SEPARATOR . $targetBaseName . '.' . $extension;
+    $working = $image;
+    $width = imagesx($working);
+    $height = imagesy($working);
+
+    while (true) {
+        for ($quality = 82; $quality >= 30; $quality -= 6) {
+            ob_start();
+            $saved = $supportsWebp ? imagewebp($working, null, $quality) : imagejpeg($working, null, $quality);
+            $binary = ob_get_clean();
+
+            if (!$saved || $binary === false) {
+                continue;
+            }
+
+            if (strlen($binary) <= $maxBytes || $quality <= 36) {
+                if (file_put_contents($target, $binary, LOCK_EX) === false) {
+                    if ($working !== $image) {
+                        imagedestroy($working);
+                    }
+                    return null;
+                }
+
+                if ($working !== $image) {
+                    imagedestroy($working);
+                }
+
+                return 'uploads/' . basename($target);
+            }
+        }
+
+        if ($width <= 840 || $height <= 1050) {
+            break;
+        }
+
+        $width = (int) floor($width * 0.88);
+        $height = (int) floor($height * 0.88);
+        $resized = imagecreatetruecolor($width, $height);
+        imagecopyresampled($resized, $working, 0, 0, 0, 0, $width, $height, imagesx($working), imagesy($working));
+
+        if ($working !== $image) {
+            imagedestroy($working);
+        }
+        $working = $resized;
+    }
+
+    ob_start();
+    $saved = $supportsWebp ? imagewebp($working, null, 28) : imagejpeg($working, null, 28);
+    $binary = ob_get_clean();
+
+    if ($working !== $image) {
+        imagedestroy($working);
+    }
+
+    if (!$saved || $binary === false || file_put_contents($target, $binary, LOCK_EX) === false) {
+        return null;
+    }
+
+    return 'uploads/' . basename($target);
+}
+
 function uploadAlbumPhotoWithRandomFrame(string $fieldName): ?string
 {
     if (empty($_FILES[$fieldName]['name'])) {
@@ -164,17 +330,12 @@ function uploadAlbumPhotoWithRandomFrame(string $fieldName): ?string
         return null;
     }
 
-    $imageInfo = @getimagesize($file['tmp_name']);
-    if ($imageInfo === false) {
-        return null;
-    }
-
     $frameFiles = glob(BASE_PATH . DIRECTORY_SEPARATOR . 'filtros' . DIRECTORY_SEPARATOR . '*.png') ?: [];
     if ($frameFiles === []) {
         return uploadImage($fieldName);
     }
 
-    if (!function_exists('imagecreatefromstring') || !function_exists('imagepng')) {
+    if (!function_exists('imagecreatefromstring')) {
         return uploadImage($fieldName);
     }
 
@@ -201,6 +362,8 @@ function uploadAlbumPhotoWithRandomFrame(string $fieldName): ?string
         return null;
     }
 
+    $sourceImage = normalizeUploadedPhotoOrientation($sourceImage, (string) $file['tmp_name'], $ext);
+
     $frameWidth = imagesx($frameImage);
     $frameHeight = imagesy($frameImage);
     $sourceWidth = imagesx($sourceImage);
@@ -212,47 +375,50 @@ function uploadAlbumPhotoWithRandomFrame(string $fieldName): ?string
         return null;
     }
 
+    $photoWindow = detectFramePhotoWindow($frameImage);
     $canvas = imagecreatetruecolor($frameWidth, $frameHeight);
-    imagealphablending($canvas, false);
-    imagesavealpha($canvas, true);
-    $transparent = imagecolorallocatealpha($canvas, 0, 0, 0, 127);
-    imagefill($canvas, 0, 0, $transparent);
+    $background = imagecolorallocate($canvas, 248, 241, 232);
+    imagefill($canvas, 0, 0, $background);
 
-    $scale = max($frameWidth / $sourceWidth, $frameHeight / $sourceHeight);
-    $targetWidth = (int) ceil($sourceWidth * $scale);
-    $targetHeight = (int) ceil($sourceHeight * $scale);
-    $targetX = (int) floor(($frameWidth - $targetWidth) / 2);
-    $targetY = (int) floor(($frameHeight - $targetHeight) / 2);
+    $destinationRatio = $photoWindow['width'] / $photoWindow['height'];
+    $sourceRatio = $sourceWidth / $sourceHeight;
+
+    if ($sourceRatio > $destinationRatio) {
+        $cropHeight = $sourceHeight;
+        $cropWidth = (int) round($sourceHeight * $destinationRatio);
+        $cropX = (int) floor(($sourceWidth - $cropWidth) / 2);
+        $cropY = 0;
+    } else {
+        $cropWidth = $sourceWidth;
+        $cropHeight = (int) round($sourceWidth / $destinationRatio);
+        $cropX = 0;
+        $cropY = (int) floor(($sourceHeight - $cropHeight) / 2);
+    }
 
     imagecopyresampled(
         $canvas,
         $sourceImage,
-        $targetX,
-        $targetY,
-        0,
-        0,
-        $targetWidth,
-        $targetHeight,
-        $sourceWidth,
-        $sourceHeight
+        $photoWindow['x'],
+        $photoWindow['y'],
+        $cropX,
+        $cropY,
+        $photoWindow['width'],
+        $photoWindow['height'],
+        $cropWidth,
+        $cropHeight
     );
 
     imagealphablending($canvas, true);
     imagecopy($canvas, $frameImage, 0, 0, 0, 0, $frameWidth, $frameHeight);
 
-    $filename = 'album_' . time() . '_' . random_int(1000, 9999) . '.png';
-    $target = UPLOADS_PATH . DIRECTORY_SEPARATOR . $filename;
-    $saved = imagepng($canvas, $target);
+    $targetBaseName = 'album_' . time() . '_' . random_int(1000, 9999);
+    $savedPath = encodeCompositeImageToSize($canvas, $targetBaseName);
 
     imagedestroy($canvas);
     imagedestroy($sourceImage);
     imagedestroy($frameImage);
 
-    if (!$saved) {
-        return null;
-    }
-
-    return 'uploads/' . $filename;
+    return $savedPath;
 }
 
 function jsonResponse($data, $status = 200): void

@@ -555,6 +555,18 @@
     $$("[data-sticker-id]", grid).forEach((item) => {
       item.addEventListener("click", () => collect(item.dataset.stickerId));
     });
+
+    const photoModal = $("#modal-album-photo");
+    const photoPreview = $("#album-photo-preview");
+    if (photoModal && photoPreview) {
+      $$("[data-open-album-photo]").forEach((button) => {
+        button.addEventListener("click", () => {
+          photoPreview.src = button.dataset.albumPhotoSrc || "";
+          photoPreview.alt = button.dataset.albumPhotoAlt || "Foto do album";
+          photoModal.classList.remove("hidden");
+        });
+      });
+    }
   };
 
   const setupFavoritos = () => {
@@ -619,18 +631,66 @@
     if (groupForm) {
       const searchInput = $("#group-user-search", groupForm);
       const hiddenUserId = $("#group-user-id", groupForm);
-      const syncSelectedUser = () => {
-        const selected = $$("option", $("#group-user-options", groupForm)).find(
-          (option) => option.value === searchInput?.value
-        );
-        hiddenUserId.value = selected?.dataset.userId || "";
+      const results = $("#group-user-results", groupForm);
+      const selectedBox = $("#group-user-selected", groupForm);
+      const selectedName = $("[data-selected-user-name]", groupForm);
+      const selectedHandle = $("[data-selected-user-handle]", groupForm);
+      const clearSelected = $("[data-clear-group-user]", groupForm);
+      const options = $$("[data-group-user-option]", groupForm);
+
+      const renderResults = () => {
+        const term = (searchInput?.value || "").trim().toLowerCase();
+        let visibleCount = 0;
+        options.forEach((option) => {
+          const haystack = `${option.dataset.userName || ""} ${option.dataset.userHandle || ""}`.toLowerCase();
+          const match = term === "" || haystack.includes(term);
+          option.classList.toggle("hidden", !match);
+          if (match) visibleCount += 1;
+        });
+        results?.classList.toggle("hidden", visibleCount === 0 || !!hiddenUserId.value);
       };
-      searchInput?.addEventListener("input", syncSelectedUser);
-      searchInput?.addEventListener("change", syncSelectedUser);
+
+      const selectUser = (option) => {
+        hiddenUserId.value = option.dataset.userId || "";
+        if (searchInput) {
+          searchInput.value = option.dataset.userName || "";
+        }
+        if (selectedName) {
+          selectedName.textContent = option.dataset.userName || "";
+        }
+        if (selectedHandle) {
+          selectedHandle.textContent = `@${option.dataset.userHandle || ""}`;
+        }
+        selectedBox?.classList.remove("hidden");
+        renderResults();
+      };
+
+      const clearUser = () => {
+        hiddenUserId.value = "";
+        if (searchInput) {
+          searchInput.value = "";
+          searchInput.focus();
+        }
+        selectedBox?.classList.add("hidden");
+        renderResults();
+      };
+
+      searchInput?.addEventListener("focus", renderResults);
+      searchInput?.addEventListener("input", () => {
+        hiddenUserId.value = "";
+        selectedBox?.classList.add("hidden");
+        renderResults();
+      });
+      clearSelected?.addEventListener("click", clearUser);
+
+      options.forEach((option) => {
+        option.addEventListener("click", () => selectUser(option));
+      });
+
+      renderResults();
 
       groupForm.addEventListener("submit", async (e) => {
         e.preventDefault();
-        syncSelectedUser();
         if (!hiddenUserId?.value) {
           showToast("Escolha um usuario da lista para compartilhar.");
           searchInput?.focus();

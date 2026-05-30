@@ -150,38 +150,71 @@ include __DIR__ . '/includes/header.php';
         <h3>Montar roteiro com outro usuario</h3>
         <p class="muted">Pesquise a pessoa e compartilhe um item para ele aparecer no roteiro dos dois.</p>
         <?php if (!empty($usuariosParaCompartilhar)): ?>
-            <form id="form-add-group-item">
-                <label>Pesquisar usuario</label>
-                <input
-                    type="text"
-                    id="group-user-search"
-                    list="group-user-options"
-                    placeholder="Digite o nome ou @usuario"
-                    autocomplete="off"
-                    required
-                >
-                <datalist id="group-user-options">
-                    <?php foreach ($usuariosParaCompartilhar as $shareUser): ?>
-                        <option
-                            value="<?= sanitize((string) $shareUser['nome'] . ' (@' . (string) $shareUser['usuario'] . ')'); ?>"
-                            data-user-id="<?= (int) $shareUser['id']; ?>"
-                        ></option>
-                    <?php endforeach; ?>
-                </datalist>
+            <form id="form-add-group-item" class="group-share-form">
+                <div class="group-user-picker">
+                    <label for="group-user-search">Pesquisar usuario</label>
+                    <div class="group-user-search-wrap">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input
+                            type="text"
+                            id="group-user-search"
+                            placeholder="Digite o nome ou @usuario"
+                            autocomplete="off"
+                            required
+                        >
+                    </div>
+                    <div class="group-user-results" id="group-user-results">
+                        <?php foreach ($usuariosParaCompartilhar as $shareUser): ?>
+                            <button
+                                type="button"
+                                class="group-user-option"
+                                data-group-user-option
+                                data-user-id="<?= (int) $shareUser['id']; ?>"
+                                data-user-name="<?= sanitize((string) $shareUser['nome']); ?>"
+                                data-user-handle="<?= sanitize((string) $shareUser['usuario']); ?>"
+                            >
+                                <img src="<?= sanitize((string) ($shareUser['avatar'] ?? 'assets/img/avatar-default.svg')); ?>" alt="<?= sanitize((string) $shareUser['nome']); ?>">
+                                <span>
+                                    <strong><?= sanitize((string) $shareUser['nome']); ?></strong>
+                                    <small>@<?= sanitize((string) $shareUser['usuario']); ?></small>
+                                </span>
+                            </button>
+                        <?php endforeach; ?>
+                    </div>
+                    <div class="group-user-selected hidden" id="group-user-selected">
+                        <span class="group-user-selected-copy">
+                            <strong data-selected-user-name></strong>
+                            <small data-selected-user-handle></small>
+                        </span>
+                        <button type="button" class="icon-btn soft" data-clear-group-user>
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
                 <input type="hidden" name="partner_user_id" id="group-user-id">
                 <input type="hidden" name="tipo" value="grupo">
-                <label>Horario</label>
-                <input type="time" name="horario" required>
-                <label>Titulo</label>
-                <input type="text" name="titulo" placeholder="Ex: Show de Forro" required>
-                <label>Local</label>
-                <input type="text" name="local" placeholder="Ex: Palco Multicultural" required>
-                <label>Tipo</label>
-                <select name="categoria">
-                    <option value="show">Show</option>
-                    <option value="gastronomia">Gastronomia</option>
-                    <option value="ponto">Ponto turistico</option>
-                </select>
+                <div class="group-share-grid">
+                    <div>
+                        <label>Horario</label>
+                        <input type="time" name="horario" required>
+                    </div>
+                    <div>
+                        <label>Titulo</label>
+                        <input type="text" name="titulo" placeholder="Ex: Show de Forro" required>
+                    </div>
+                    <div>
+                        <label>Local</label>
+                        <input type="text" name="local" placeholder="Ex: Palco Multicultural" required>
+                    </div>
+                    <div>
+                        <label>Tipo</label>
+                        <select name="categoria">
+                            <option value="show">Show</option>
+                            <option value="gastronomia">Gastronomia</option>
+                            <option value="ponto">Ponto turistico</option>
+                        </select>
+                    </div>
+                </div>
                 <button class="btn btn-primary btn-xl" type="submit">Compartilhar roteiro</button>
             </form>
         <?php else: ?>

@@ -59,6 +59,11 @@ $avatar = $current['avatar'] ?? 'assets/img/avatar-default.svg';
                     <?php if ($rightHtml !== ''): ?>
                         <?= $rightHtml; ?>
                     <?php else: ?>
+                        <?php if (isAdminUser($current)): ?>
+                            <a href="admin.php" class="icon-btn soft" aria-label="Administrador">
+                                <i class="fa-solid fa-shield-halved"></i>
+                            </a>
+                        <?php endif; ?>
                         <a href="perfil.php" class="avatar-link" aria-label="Perfil">
                             <img src="<?= sanitize($avatar); ?>" alt="Avatar" class="avatar-sm">
                         </a>

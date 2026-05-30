@@ -44,6 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'criado_em' => date('Y-m-d'),
                 'favoritos' => [],
                 'figurinhas' => [1],
+                'is_admin' => mb_strtolower($email) === mb_strtolower(MASTER_USER_EMAIL),
             ];
             writeJson('users.json', $users);
             $message = 'Cadastro concluido! Agora faca login.';

@@ -17,11 +17,15 @@ $unread = count(array_filter($notificacoes, fn($n) => empty($n['lida'])));
 $collected = count($user['figurinhas'] ?? []);
 $totalAlbum = 24;
 
-$pageTitle = 'São João 2026';
+$pageTitle = 'Sao Joao 2026';
 $pageEyebrow = 'festival';
 $activeTab = 'home';
+$adminShortcut = isAdminUser($user)
+    ? '<a href="admin.php" class="icon-btn soft" aria-label="Administrador"><i class="fa-solid fa-shield-halved"></i></a>'
+    : '';
 $rightHtml = '
     <a href="#" class="icon-btn"><i class="fa-regular fa-bell"></i><span class="dot"></span></a>
+    ' . $adminShortcut . '
     <a href="perfil.php" class="avatar-link"><img src="' . sanitize($user['avatar']) . '" alt="Avatar" class="avatar-sm"></a>
 ';
 include __DIR__ . '/includes/header.php';
@@ -31,16 +35,17 @@ include __DIR__ . '/includes/header.php';
     <div class="overlay"></div>
     <div class="hero-content">
         <p class="hero-location">ARCOVERDE, PE</p>
-        <span class="chip light"><i class="fa-regular fa-sun"></i> 22°C</span>
-        <h2>Hoje no São João</h2>
-        <p>24 de Junho • Noite de São João</p>
+        <span class="chip light"><i class="fa-regular fa-sun"></i> 22C</span>
+        <h2>Hoje no Sao Joao</h2>
+        <p>24 de Junho - Noite de Sao Joao</p>
     </div>
 </section>
 
 <section class="quick-grid">
-    <a href="programacao.php" class="quick-card quick-card-primary"><i class="fa-regular fa-calendar"></i><span>Programação</span></a>
+    <a href="programacao.php" class="quick-card quick-card-primary"><i class="fa-regular fa-calendar"></i><span>Programacao</span></a>
     <a href="restaurantes.php" class="quick-card"><i class="fa-solid fa-utensils"></i><span>Restaurantes</span></a>
-    <a href="album.php" class="quick-card"><i class="fa-regular fa-map"></i><span>Álbum</span></a>
+    <a href="hospedagem.php" class="quick-card"><i class="fa-solid fa-bed"></i><span>Hospedagem</span></a>
+    <a href="album.php" class="quick-card"><i class="fa-regular fa-map"></i><span>Album</span></a>
     <a href="roteiro.php" class="quick-card"><i class="fa-regular fa-map"></i><span>Roteiro</span></a>
 </section>
 
@@ -63,14 +68,14 @@ include __DIR__ . '/includes/header.php';
 
 <article class="card card-soft progress-highlight">
     <div class="row-between">
-        <h4>Álbum de Figurinhas</h4>
+        <h4>Album de Figurinhas</h4>
         <strong><?= $collected; ?> / <?= $totalAlbum; ?> Colecionadas</strong>
     </div>
     <div class="progress"><span style="width: <?= min(100, ($collected / 6) * 100); ?>%"></span></div>
-    <p>Visite mais 2 pontos turísticos para completar seu álbum!</p>
+    <p>Visite mais 2 pontos turisticos para completar seu album!</p>
 </article>
 
-<section class="section-head"><h3>Pontos Estratégicos</h3></section>
+<section class="section-head"><h3>Pontos Estrategicos</h3></section>
 <div class="stack-list">
     <?php foreach (array_slice($pontos, 0, 3) as $ponto): ?>
         <article class="point-card">
@@ -79,7 +84,7 @@ include __DIR__ . '/includes/header.php';
             </span>
             <div>
                 <h4><?= sanitize($ponto['nome']); ?></h4>
-                <p><?= sanitize($ponto['local']); ?> • <?= sanitize($ponto['distancia']); ?></p>
+                <p><?= sanitize($ponto['local']); ?> - <?= sanitize($ponto['distancia']); ?></p>
             </div>
             <i class="fa-solid fa-angle-right"></i>
         </article>
@@ -87,9 +92,9 @@ include __DIR__ . '/includes/header.php';
 </div>
 
 <article class="card card-soft ai-tip">
-    <h4><i class="fa-solid fa-wand-magic-sparkles"></i> Sugestão Inteligente</h4>
-    <p>Como você está perto do Polo Gastronômico e o show começa em 40 minutos, recomendamos jantar agora no Casarão do Forró.</p>
-    <div class="alert-mini"><i class="fa-regular fa-bell"></i> <?= $unread; ?> alertas úteis ativos</div>
+    <h4><i class="fa-solid fa-wand-magic-sparkles"></i> Sugestao Inteligente</h4>
+    <p>Como voce esta perto do Polo Gastronomico e o show comeca em 40 minutos, recomendamos jantar agora no Casarao do Forro.</p>
+    <div class="alert-mini"><i class="fa-regular fa-bell"></i> <?= $unread; ?> alertas uteis ativos</div>
 </article>
 
 <a href="grupos.php" class="fab-main" aria-label="Ir para grupos"><i class="fa-solid fa-plus"></i></a>

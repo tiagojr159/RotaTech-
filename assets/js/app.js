@@ -37,6 +37,7 @@
       "home.php": "home",
       "programacao.php": "explorar",
       "restaurantes.php": "explorar",
+      "hospedagem.php": "explorar",
       "album.php": "album",
       "roteiro.php": "roteiro",
       "grupos.php": "roteiro",
@@ -151,6 +152,35 @@
         });
       });
     }
+  };
+
+  const setupHospedagem = () => {
+    const input = $("[data-hosp-search]");
+    const cards = $$("[data-hosp-card]");
+    if (!input || !cards.length) return;
+
+    let cat = "todos";
+    const apply = () => {
+      const term = input.value.toLowerCase().trim();
+      cards.forEach((card) => {
+        const name = card.dataset.hospNome || "";
+        const category = card.dataset.hospCat || "";
+        const address = card.dataset.hospEndereco || "";
+        const okTerm = term === "" || `${name} ${address}`.includes(term);
+        const okCat = cat === "todos" || category === cat;
+        card.classList.toggle("hidden", !(okTerm && okCat));
+      });
+    };
+
+    input.addEventListener("input", apply);
+    $$("[data-hosp-filter]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        cat = btn.dataset.hospFilter || "todos";
+        $$("[data-hosp-filter]").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        apply();
+      });
+    });
   };
 
   const setupModals = () => {
@@ -480,6 +510,7 @@
     markActiveBottomTab();
     setupProgramacaoFilters();
     setupRestaurantes();
+    setupHospedagem();
     setupModals();
     setupFriendSelection();
     setupPrivacyPicker();

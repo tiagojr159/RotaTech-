@@ -85,6 +85,28 @@ function requireLogin(): void
     }
 }
 
+function isMasterUser(?array $user): bool
+{
+    if (!$user) return false;
+    return mb_strtolower((string) ($user['email'] ?? '')) === mb_strtolower(MASTER_USER_EMAIL);
+}
+
+function isAdminUser(?array $user): bool
+{
+    if (!$user) return false;
+    if (isMasterUser($user)) return true;
+    return !empty($user['is_admin']);
+}
+
+function requireAdmin(): void
+{
+    requireLogin();
+    if (!isAdminUser(currentUser())) {
+        header('Location: ' . appUrl());
+        exit;
+    }
+}
+
 function uploadImage($fieldName): ?string
 {
     if (empty($_FILES[$fieldName]['name'])) {

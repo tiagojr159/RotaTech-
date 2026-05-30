@@ -415,6 +415,14 @@
       navigator.serviceWorker.register("service-worker.js").catch(() => {});
     }
 
+    const postInstallUrl = "https://ki6.com.br/rotatech/";
+    let hasRedirectedAfterInstall = false;
+    const redirectAfterInstall = () => {
+      if (hasRedirectedAfterInstall) return;
+      hasRedirectedAfterInstall = true;
+      window.location.href = postInstallUrl;
+    };
+
     let deferredPrompt = null;
     window.addEventListener("beforeinstallprompt", (e) => {
       e.preventDefault();
@@ -430,11 +438,18 @@
       btn?.addEventListener("click", async () => {
         if (!deferredPrompt) return;
         deferredPrompt.prompt();
-        await deferredPrompt.userChoice;
+        const choice = await deferredPrompt.userChoice;
         deferredPrompt = null;
         banner.remove();
+        if (choice?.outcome === "accepted") {
+          redirectAfterInstall();
+        }
       });
       document.body.appendChild(banner);
+    });
+
+    window.addEventListener("appinstalled", () => {
+      redirectAfterInstall();
     });
   };
 
@@ -458,4 +473,3 @@
     setupPwaInstall();
   });
 })();
-

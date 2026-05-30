@@ -19,7 +19,7 @@ if ($action === 'login') {
             || mb_strtolower($user['usuario']) === mb_strtolower($login);
         if ($matchLogin && password_verify($senha, $user['senha_hash'])) {
             $_SESSION['user_id'] = $user['id'];
-            jsonResponse(['ok' => true, 'redirect' => 'home.php', 'user' => $user]);
+            jsonResponse(['ok' => true, 'redirect' => appUrl(), 'user' => $user]);
         }
     }
 

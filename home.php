@@ -4,6 +4,11 @@ require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/functions.php';
 requireLogin();
 
+if (empty($renderHomeAsIndex)) {
+    header('Location: ' . appUrl());
+    exit;
+}
+
 $user = currentUser();
 $programacao = readJson('programacao.json');
 $pontos = readJson('pontos.json');
@@ -95,4 +100,3 @@ include __DIR__ . '/includes/header.php';
 </div>
 </body>
 </html>
-

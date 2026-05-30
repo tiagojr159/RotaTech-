@@ -4,7 +4,7 @@ require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/functions.php';
 
 if (currentUser()) {
-    header('Location: home.php');
+    header('Location: ' . appUrl());
     exit;
 }
 
@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             || mb_strtolower($user['usuario']) === mb_strtolower($login);
         if ($matchLogin && password_verify($senha, $user['senha_hash'])) {
             $_SESSION['user_id'] = $user['id'];
-            header('Location: home.php');
+            header('Location: ' . appUrl());
             exit;
         }
     }
@@ -76,4 +76,3 @@ include __DIR__ . '/includes/header.php';
 </div>
 </body>
 </html>
-

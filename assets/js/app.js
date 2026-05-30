@@ -32,6 +32,8 @@
   const markActiveBottomTab = () => {
     const file = location.pathname.split("/").pop() || "";
     const map = {
+      "": "home",
+      "index.php": "home",
       "home.php": "home",
       "programacao.php": "explorar",
       "restaurantes.php": "explorar",

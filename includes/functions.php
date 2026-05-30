@@ -43,6 +43,18 @@ function sanitize($value): string
     return htmlspecialchars(trim((string) $value), ENT_QUOTES, 'UTF-8');
 }
 
+function appUrl(string $path = '', array $query = []): string
+{
+    $base = rtrim(APP_BASE_URL, '/');
+    $url = $path === '' ? $base . '/' : $base . '/' . ltrim($path, '/');
+
+    if ($query !== []) {
+        $url .= '?' . http_build_query($query);
+    }
+
+    return $url;
+}
+
 function generateId(): int
 {
     return (int) ((microtime(true) * 1000) + random_int(1, 999));

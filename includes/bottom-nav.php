@@ -9,7 +9,7 @@ if (!defined('APP_INIT')) {
 $activeTab = $activeTab ?? '';
 ?>
 <nav class="bottom-nav" data-bottom-nav>
-    <a href="home.php" class="nav-item <?= $activeTab === 'home' ? 'active' : ''; ?>" data-tab="home">
+    <a href="<?= sanitize(appUrl()); ?>" class="nav-item <?= $activeTab === 'home' ? 'active' : ''; ?>" data-tab="home">
         <i class="fa-regular fa-house"></i>
         <span>Início</span>
     </a>

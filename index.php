@@ -4,7 +4,8 @@ require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/functions.php';
 
 if (currentUser()) {
-    header('Location: home.php');
+    $renderHomeAsIndex = true;
+    require __DIR__ . '/home.php';
     exit;
 }
 
@@ -34,4 +35,3 @@ include __DIR__ . '/includes/header.php';
 </div>
 </body>
 </html>
-

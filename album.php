@@ -6,28 +6,34 @@ requireLogin();
 
 $user = currentUser();
 $figurinhas = readJson('figurinhas.json');
+$albumFotos = array_reverse(array_slice(readJson('album_fotos.json'), -50));
 $minicolecaoTotal = 6;
 $coletadas = count(array_intersect($user['figurinhas'] ?? [], array_column(array_slice($figurinhas, 0, $minicolecaoTotal), 'id')));
 $activeTab = 'album';
-$pageTitle = 'Álbum';
+$pageTitle = 'Album';
 $pageEyebrow = '';
 $rightHtml = '<a href="perfil.php" class="icon-btn soft"><i class="fa-regular fa-user"></i></a>';
 include __DIR__ . '/includes/header.php';
 ?>
 <article class="card unlock-banner">
     <small>CONQUISTA DESBLOQUEADA</small>
-    <h3>Eu vivi o São João de Arcoverde</h3>
+    <h3>Eu vivi o Sao Joao de Arcoverde</h3>
 </article>
 
 <section class="sticker-grid" data-sticker-grid>
-    <button class="sticker-card camera-card" data-collect-next>
-        <span class="camera-icon"><i class="fa-solid fa-camera"></i></span>
-        <strong>Tirar foto</strong>
-    </button>
+    <form class="sticker-card camera-card upload-photo-card" id="form-upload-album-photo" enctype="multipart/form-data">
+        <input type="hidden" name="action" value="upload_album_photo">
+        <label for="album-photo-input" class="album-upload-label">
+            <span class="camera-icon"><i class="fa-solid fa-image"></i></span>
+            <strong>Enviar foto</strong>
+            <small>Escolha uma imagem da galeria</small>
+        </label>
+        <input type="file" id="album-photo-input" name="album_photo" accept=".jpg,.jpeg,.png,.webp,image/*">
+    </form>
     <?php foreach ($figurinhas as $figurinha): ?>
         <?php $locked = !in_array((int) $figurinha['id'], $user['figurinhas'] ?? [], true); ?>
         <button class="sticker-card <?= $locked ? 'locked' : 'unlocked'; ?>" data-sticker-id="<?= (int) $figurinha['id']; ?>">
-            <img src="<?= sanitize($figurinha['imagem']); ?>" alt="<?= sanitize($figurinha['titulo']); ?>">
+            <img src="<?= sanitize((string) $figurinha['imagem']); ?>" alt="<?= sanitize((string) $figurinha['titulo']); ?>">
             <?php if ($locked): ?><span class="lock"><i class="fa-solid fa-lock"></i></span><?php endif; ?>
         </button>
     <?php endforeach; ?>
@@ -39,10 +45,25 @@ include __DIR__ . '/includes/header.php';
     <p><strong><?= $coletadas; ?></strong> de <?= $minicolecaoTotal; ?> figurinhas coletadas</p>
 </section>
 
+<section class="section-head">
+    <h3>Fotos da Galera</h3>
+    <span><?= count($albumFotos); ?> / 50</span>
+</section>
+<section class="album-feed-grid">
+    <?php foreach ($albumFotos as $foto): ?>
+        <article class="album-photo-card">
+            <img src="<?= sanitize((string) $foto['imagem']); ?>" alt="<?= sanitize((string) ($foto['user_name'] ?? 'Foto enviada')); ?>">
+            <div class="album-photo-meta">
+                <strong><?= sanitize((string) ($foto['user_name'] ?? 'Visitante')); ?></strong>
+                <small><?= sanitize((string) ($foto['created_at'] ?? 'Agora')); ?></small>
+            </div>
+        </article>
+    <?php endforeach; ?>
+</section>
+
 <?php include __DIR__ . '/includes/bottom-nav.php'; ?>
 </main>
 </div>
 </div>
 </body>
 </html>
-

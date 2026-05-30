@@ -339,6 +339,7 @@ function defaultDataMap(): array
             ['id' => 7, 'titulo' => 'Restaurante Visitado', 'descricao' => 'Sabores descobertos.', 'imagem' => 'assets/img/sticker-rest.svg', 'categoria' => 'gastronomia', 'desbloqueada' => false, 'progresso' => 0],
             ['id' => 8, 'titulo' => 'Show Assistido', 'descricao' => 'Música ao vivo curtida.', 'imagem' => 'assets/img/sticker-show.svg', 'categoria' => 'show', 'desbloqueada' => false, 'progresso' => 0],
         ],
+        'album_fotos.json' => [],
         'convites.json' => [
             ['id' => 1, 'group_id' => 3, 'from_user_id' => 3, 'to_user_id' => 1, 'status' => 'pendente'],
             ['id' => 2, 'group_id' => 2, 'from_user_id' => 5, 'to_user_id' => 1, 'status' => 'pendente'],

@@ -6,6 +6,17 @@ requireLogin();
 
 $user = currentUser();
 $programacao = readJson('programacao.json');
+$eventosNarracao = array_slice($programacao, 0, 3);
+$textoNarracao = 'Agora na programacao do Sao Joao de Arcoverde: ';
+if (!empty($eventosNarracao)) {
+    $partesNarracao = [];
+    foreach ($eventosNarracao as $evento) {
+        $partesNarracao[] = trim(($evento['artista'] ?? 'Atracao') . ' as ' . ($evento['horario'] ?? '--:--') . ' no ' . ($evento['palco'] ?? 'palco principal'));
+    }
+    $textoNarracao .= implode('. ', $partesNarracao) . '.';
+} else {
+    $textoNarracao = 'Ainda nao ha eventos cadastrados na programacao.';
+}
 $activeTab = 'explorar';
 $pageTitle = 'Programação';
 $pageEyebrow = 'festival';
@@ -25,6 +36,25 @@ include __DIR__ . '/includes/header.php';
     <button class="chip chip-filter" data-palco="Polo Gastronômico">Polo Gastronômico</button>
     <button class="chip chip-filter" data-palco="Palco Principal">Palco Principal</button>
 </section>
+
+<article class="card voice-guide-card">
+    <div>
+        <p class="eyebrow">Assistente de voz</p>
+        <h3>Ouvir 3 eventos da programação</h3>
+        <p>Quando a página abrir, o app tenta anunciar os próximos destaques. Se o celular bloquear, é só tocar no botão.</p>
+    </div>
+    <button
+        type="button"
+        class="btn btn-primary"
+        data-voice-trigger
+        data-voice-context="programacao"
+        data-voice-autoplay="true"
+        data-voice-text="<?= sanitize($textoNarracao); ?>"
+    >
+        <i class="fa-solid fa-volume-high"></i>
+        Ouvir agenda
+    </button>
+</article>
 
 <section class="stack-list programacao-list">
     <?php foreach ($programacao as $atracao): ?>
@@ -82,4 +112,3 @@ include __DIR__ . '/includes/header.php';
 </div>
 </body>
 </html>
-

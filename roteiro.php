@@ -26,6 +26,24 @@ foreach ($roteiros as $roteiro) {
     }
 }
 
+$textoRoteiroPessoal = '';
+if (!empty($meuRoteiro['itens'])) {
+    $partesRoteiro = [];
+    foreach ($meuRoteiro['itens'] as $item) {
+        $partesRoteiro[] = trim(($item['titulo'] ?? 'Parada') . ' as ' . ($item['horario'] ?? '--:--') . ' em ' . ($item['local'] ?? 'Arcoverde'));
+    }
+    $textoRoteiroPessoal = 'Este e o seu roteiro: ' . implode('. ', $partesRoteiro) . '.';
+}
+
+$textoRoteiroGrupo = '';
+if (!empty($roteiroGrupo['itens'])) {
+    $partesGrupo = [];
+    foreach ($roteiroGrupo['itens'] as $item) {
+        $partesGrupo[] = trim(($item['titulo'] ?? 'Parada') . ' as ' . ($item['horario'] ?? '--:--') . ' em ' . ($item['local'] ?? 'Arcoverde'));
+    }
+    $textoRoteiroGrupo = 'Este e o roteiro do grupo: ' . implode('. ', $partesGrupo) . '.';
+}
+
 $activeTab = 'roteiro';
 $pageTitle = 'Roteiro';
 $pageEyebrow = 'festival';
@@ -36,6 +54,45 @@ include __DIR__ . '/includes/header.php';
     <button class="toggle-btn" data-target="grupo">Grupo</button>
 </section>
 <p class="date-line"><i class="fa-regular fa-calendar"></i> Sexta, 24 de Junho</p>
+
+<?php if ($textoRoteiroPessoal !== '' || $textoRoteiroGrupo !== ''): ?>
+    <article class="card voice-guide-card">
+        <div>
+            <p class="eyebrow">Assistente de voz</p>
+            <h3>Ouvir roteiro</h3>
+            <p>O app consegue ler a trilha do seu roteiro e tambem o roteiro do grupo.</p>
+        </div>
+        <div class="voice-guide-actions">
+            <?php if ($textoRoteiroPessoal !== ''): ?>
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    data-voice-trigger
+                    data-voice-context="roteiro"
+                    data-voice-scope="pessoal"
+                    data-voice-autoplay="true"
+                    data-voice-text="<?= sanitize($textoRoteiroPessoal); ?>"
+                >
+                    <i class="fa-solid fa-volume-high"></i>
+                    Ouvir meu roteiro
+                </button>
+            <?php endif; ?>
+            <?php if ($textoRoteiroGrupo !== ''): ?>
+                <button
+                    type="button"
+                    class="btn btn-light"
+                    data-voice-trigger
+                    data-voice-context="roteiro"
+                    data-voice-scope="grupo"
+                    data-voice-text="<?= sanitize($textoRoteiroGrupo); ?>"
+                >
+                    <i class="fa-solid fa-users"></i>
+                    Ouvir roteiro do grupo
+                </button>
+            <?php endif; ?>
+        </div>
+    </article>
+<?php endif; ?>
 
 <section data-roteiro-panel="pessoal">
     <div class="stack-list">
@@ -125,4 +182,3 @@ include __DIR__ . '/includes/header.php';
 </div>
 </body>
 </html>
-

@@ -7,10 +7,11 @@ requireAdmin();
 $message = '';
 $error = '';
 $activeAdminTab = sanitize($_POST['admin_tab'] ?? $_GET['tab'] ?? 'hospedagem');
-if (!in_array($activeAdminTab, ['hospedagem', 'restaurantes', 'eventos'], true)) {
+if (!in_array($activeAdminTab, ['usuarios', 'hospedagem', 'restaurantes', 'eventos'], true)) {
     $activeAdminTab = 'hospedagem';
 }
 
+$users = readJson('users.json');
 $hospedagens = readJson('hospedagens.json');
 $restaurantes = readJson('restaurantes.json');
 $programacao = readJson('programacao.json');
@@ -28,6 +29,76 @@ $nextId = static function (array $rows): int {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = sanitize($_POST['action'] ?? '');
+
+    if ($action === 'save_user') {
+        $id = (int) ($_POST['id'] ?? 0);
+        $nome = sanitize($_POST['nome'] ?? '');
+        $usuario = sanitize($_POST['usuario'] ?? '');
+        $email = sanitize($_POST['email'] ?? '');
+        $senha = (string) ($_POST['senha'] ?? '');
+        $titulo = sanitize($_POST['titulo'] ?? 'NOVO USUARIO');
+        $imagemAtual = sanitize($_POST['avatar_atual'] ?? '');
+        $avatar = uploadImage('avatar') ?? ($imagemAtual !== '' ? $imagemAtual : 'assets/img/avatar-default.svg');
+        $isAdmin = !empty($_POST['is_admin']);
+
+        if ($nome === '' || $usuario === '' || $email === '') {
+            $error = 'Preencha nome, usuario e email.';
+        } else {
+            $duplicado = false;
+            foreach ($users as $item) {
+                if ((int) ($item['id'] ?? 0) === $id) {
+                    continue;
+                }
+                if (mb_strtolower((string) ($item['email'] ?? '')) === mb_strtolower($email) || mb_strtolower((string) ($item['usuario'] ?? '')) === mb_strtolower($usuario)) {
+                    $duplicado = true;
+                    break;
+                }
+            }
+
+            if ($duplicado) {
+                $error = 'Email ou usuario ja cadastrado.';
+            } else {
+                $updated = false;
+                foreach ($users as &$item) {
+                    if ((int) ($item['id'] ?? 0) === $id && $id > 0) {
+                        $item['nome'] = $nome;
+                        $item['usuario'] = $usuario;
+                        $item['email'] = $email;
+                        $item['titulo'] = $titulo;
+                        $item['avatar'] = $avatar;
+                        $item['is_admin'] = $isAdmin;
+                        if ($senha !== '') {
+                            $item['senha_hash'] = password_hash($senha, PASSWORD_DEFAULT);
+                        }
+                        $updated = true;
+                        break;
+                    }
+                }
+                unset($item);
+
+                if (!$updated) {
+                    $users[] = [
+                        'id' => generateId(),
+                        'nome' => $nome,
+                        'usuario' => $usuario,
+                        'email' => $email,
+                        'senha_hash' => password_hash($senha !== '' ? $senha : '123456', PASSWORD_DEFAULT),
+                        'avatar' => $avatar,
+                        'nivel' => 1,
+                        'titulo' => $titulo,
+                        'pontos' => 0,
+                        'criado_em' => date('Y-m-d'),
+                        'favoritos' => [],
+                        'figurinhas' => [1],
+                        'is_admin' => $isAdmin,
+                    ];
+                }
+
+                writeJson('users.json', $users);
+                $message = $updated ? 'Usuario atualizado.' : 'Usuario cadastrado.';
+            }
+        }
+    }
 
     if ($action === 'save_hospedagem') {
         $id = (int) ($_POST['id'] ?? 0);
@@ -170,6 +241,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $hospedagens = readJson('hospedagens.json');
     $restaurantes = readJson('restaurantes.json');
     $programacao = readJson('programacao.json');
+    $users = readJson('users.json');
 }
 
 $showTopBar = true;
@@ -188,12 +260,51 @@ include __DIR__ . '/includes/header.php';
     </article>
 
     <nav class="admin-tab-menu">
-        <button type="button" class="admin-tab-btn" data-admin-tab-button="hospedagem"><i class="fa-solid fa-bed"></i><span>Hoteis e pousadas</span></button>
-        <button type="button" class="admin-tab-btn" data-admin-tab-button="restaurantes"><i class="fa-solid fa-utensils"></i><span>Restaurantes</span></button>
-        <button type="button" class="admin-tab-btn" data-admin-tab-button="eventos"><i class="fa-solid fa-calendar-days"></i><span>Eventos</span></button>
+        <a href="admin.php?tab=usuarios" class="admin-tab-btn <?= $activeAdminTab === 'usuarios' ? 'active' : ''; ?>"><i class="fa-solid fa-users"></i><span>Usuarios</span></a>
+        <a href="admin.php?tab=hospedagem" class="admin-tab-btn <?= $activeAdminTab === 'hospedagem' ? 'active' : ''; ?>"><i class="fa-solid fa-bed"></i><span>Hoteis e pousadas</span></a>
+        <a href="admin.php?tab=restaurantes" class="admin-tab-btn <?= $activeAdminTab === 'restaurantes' ? 'active' : ''; ?>"><i class="fa-solid fa-utensils"></i><span>Restaurantes</span></a>
+        <a href="admin.php?tab=eventos" class="admin-tab-btn <?= $activeAdminTab === 'eventos' ? 'active' : ''; ?>"><i class="fa-solid fa-calendar-days"></i><span>Eventos</span></a>
     </nav>
 
-    <section class="admin-section" data-admin-tab-panel="hospedagem">
+    <section class="admin-section <?= $activeAdminTab === 'usuarios' ? '' : 'hidden'; ?>">
+        <div class="section-head admin-section-head">
+            <h3>Usuarios</h3>
+            <button type="button" class="btn btn-primary" data-open-modal="modal-user-create">Novo cadastro</button>
+        </div>
+        <div class="stack-list admin-list">
+            <?php foreach ($users as $item): ?>
+                <article class="card admin-item">
+                    <div class="admin-item-media">
+                        <img src="<?= sanitize((string) ($item['avatar'] ?? 'assets/img/avatar-default.svg')); ?>" alt="<?= sanitize((string) $item['nome']); ?>" class="admin-thumb">
+                    </div>
+                    <div class="admin-item-copy">
+                        <h4><?= sanitize((string) $item['nome']); ?></h4>
+                        <p>@<?= sanitize((string) $item['usuario']); ?> - <?= sanitize((string) $item['email']); ?></p>
+                        <small><?= !empty($item['is_admin']) || isMasterUser($item) ? 'Administrador' : 'Usuario comum'; ?></small>
+                    </div>
+                    <div class="admin-actions">
+                        <button
+                            type="button"
+                            class="icon-btn soft"
+                            data-open-modal="modal-user-edit"
+                            data-edit-user
+                            data-id="<?= (int) $item['id']; ?>"
+                            data-nome="<?= sanitize((string) $item['nome']); ?>"
+                            data-usuario="<?= sanitize((string) $item['usuario']); ?>"
+                            data-email="<?= sanitize((string) $item['email']); ?>"
+                            data-titulo="<?= sanitize((string) ($item['titulo'] ?? 'NOVO USUARIO')); ?>"
+                            data-avatar="<?= sanitize((string) ($item['avatar'] ?? 'assets/img/avatar-default.svg')); ?>"
+                            data-is-admin="<?= !empty($item['is_admin']) || isMasterUser($item) ? '1' : '0'; ?>"
+                        >
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                    </div>
+                </article>
+            <?php endforeach; ?>
+        </div>
+    </section>
+
+    <section class="admin-section <?= $activeAdminTab === 'hospedagem' ? '' : 'hidden'; ?>">
         <div class="section-head admin-section-head">
             <h3>Hoteis e Pousadas</h3>
             <button type="button" class="btn btn-primary" data-open-modal="modal-hospedagem-create">Novo cadastro</button>
@@ -236,7 +347,7 @@ include __DIR__ . '/includes/header.php';
         </div>
     </section>
 
-    <section class="admin-section hidden" data-admin-tab-panel="restaurantes">
+    <section class="admin-section <?= $activeAdminTab === 'restaurantes' ? '' : 'hidden'; ?>">
         <div class="section-head admin-section-head">
             <h3>Restaurantes</h3>
             <button type="button" class="btn btn-primary" data-open-modal="modal-restaurante-create">Novo cadastro</button>
@@ -277,7 +388,7 @@ include __DIR__ . '/includes/header.php';
         </div>
     </section>
 
-    <section class="admin-section hidden" data-admin-tab-panel="eventos">
+    <section class="admin-section <?= $activeAdminTab === 'eventos' ? '' : 'hidden'; ?>">
         <div class="section-head admin-section-head">
             <h3>Eventos</h3>
             <button type="button" class="btn btn-primary" data-open-modal="modal-evento-create">Novo cadastro</button>
@@ -316,6 +427,49 @@ include __DIR__ . '/includes/header.php';
         </div>
     </section>
 </section>
+
+<div class="modal hidden" id="modal-user-create">
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-content">
+        <h3>Novo Usuario</h3>
+        <form class="stacked-form" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="action" value="save_user">
+            <input type="hidden" name="admin_tab" value="usuarios">
+            <input type="hidden" name="id" value="0">
+            <input type="hidden" name="avatar_atual" value="assets/img/avatar-default.svg">
+            <label>Foto</label><input type="file" name="avatar" accept=".jpg,.jpeg,.png,.webp">
+            <label>Nome</label><input type="text" name="nome" required>
+            <label>Usuario</label><input type="text" name="usuario" required>
+            <label>Email</label><input type="email" name="email" required>
+            <label>Senha</label><input type="password" name="senha" minlength="6">
+            <label>Titulo</label><input type="text" name="titulo" value="NOVO USUARIO">
+            <label><input type="checkbox" name="is_admin" value="1"> Administrador</label>
+            <button class="btn btn-primary btn-xl" type="submit">Salvar usuario</button>
+        </form>
+    </div>
+</div>
+
+<div class="modal hidden" id="modal-user-edit">
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-content">
+        <h3>Editar Usuario</h3>
+        <form class="stacked-form" method="post" enctype="multipart/form-data" id="form-edit-user">
+            <input type="hidden" name="action" value="save_user">
+            <input type="hidden" name="admin_tab" value="usuarios">
+            <input type="hidden" name="id" value="0">
+            <input type="hidden" name="avatar_atual" value="">
+            <img src="assets/img/avatar-default.svg" alt="Avatar do usuario" class="admin-thumb admin-user-preview" data-user-preview>
+            <label>Foto</label><input type="file" name="avatar" accept=".jpg,.jpeg,.png,.webp">
+            <label>Nome</label><input type="text" name="nome" required>
+            <label>Usuario</label><input type="text" name="usuario" required>
+            <label>Email</label><input type="email" name="email" required>
+            <label>Nova senha</label><input type="password" name="senha" minlength="6" placeholder="Deixe em branco para manter">
+            <label>Titulo</label><input type="text" name="titulo" value="NOVO USUARIO">
+            <label><input type="checkbox" name="is_admin" value="1"> Administrador</label>
+            <button class="btn btn-primary btn-xl" type="submit">Atualizar usuario</button>
+        </form>
+    </div>
+</div>
 
 <div class="modal hidden" id="modal-hospedagem-create">
     <div class="modal-backdrop" data-close-modal></div>

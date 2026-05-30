@@ -243,6 +243,28 @@ switch ($action) {
         jsonResponse(['ok' => true, 'message' => 'Figurinha coletada!', 'sticker_id' => $stickerId]);
         break;
 
+    case 'upload_album_photo':
+        $imagem = uploadImage('album_photo');
+        if ($imagem === null) {
+            jsonResponse(['ok' => false, 'message' => 'Selecione uma imagem valida para enviar.'], 422);
+        }
+
+        $albumFotos = readJson('album_fotos.json');
+        $albumFotos[] = [
+            'id' => generateId(),
+            'user_id' => (int) $current['id'],
+            'user_name' => (string) ($current['nome'] ?? 'Visitante'),
+            'user_avatar' => (string) ($current['avatar'] ?? 'assets/img/avatar-default.svg'),
+            'imagem' => $imagem,
+            'created_at' => date('d/m/Y H:i'),
+        ];
+        if (count($albumFotos) > 50) {
+            $albumFotos = array_slice($albumFotos, -50);
+        }
+        writeJson('album_fotos.json', $albumFotos);
+        jsonResponse(['ok' => true, 'message' => 'Foto enviada para o album!', 'imagem' => $imagem]);
+        break;
+
     case 'atualizar_perfil':
         $nome = sanitize($_POST['nome'] ?? $users[$userIndex]['nome']);
         $usuario = sanitize($_POST['usuario'] ?? $users[$userIndex]['usuario']);

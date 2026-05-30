@@ -127,6 +127,124 @@
     });
   };
 
+  const setupVoiceGuides = () => {
+    const buttons = $$("[data-voice-trigger]");
+    if (!buttons.length) return;
+
+    let activeButton = null;
+    let activeUtterance = null;
+    const player = new Audio();
+    player.preload = "none";
+
+    const clearState = () => {
+      if (activeButton) {
+        activeButton.disabled = false;
+        activeButton.classList.remove("is-playing");
+      }
+      activeButton = null;
+      activeUtterance = null;
+    };
+
+    const stopAll = () => {
+      try {
+        player.pause();
+        player.currentTime = 0;
+        player.removeAttribute("src");
+      } catch (_) {}
+
+      try {
+        if ("speechSynthesis" in window) {
+          window.speechSynthesis.cancel();
+        }
+      } catch (_) {}
+
+      clearState();
+    };
+
+    const speakFallback = (button) => {
+      const text = button.dataset.voiceText || "";
+      if (!text || !("speechSynthesis" in window)) {
+        return false;
+      }
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "pt-BR";
+      utterance.rate = 0.96;
+      utterance.pitch = 1;
+      utterance.onend = clearState;
+      utterance.onerror = clearState;
+      activeUtterance = utterance;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+      return true;
+    };
+
+    const playVoice = async (button, autoplay = false) => {
+      if (activeButton === button) {
+        stopAll();
+        return;
+      }
+
+      stopAll();
+      activeButton = button;
+      activeButton.disabled = true;
+      activeButton.classList.add("is-playing");
+
+      const params = new URLSearchParams({
+        context: button.dataset.voiceContext || "",
+        _: String(Date.now()),
+      });
+
+      if (button.dataset.voiceScope) {
+        params.set("scope", button.dataset.voiceScope);
+      }
+
+      player.src = `${window.APP_BASE_URL || "/rotatech/"}voice.php?${params.toString()}`;
+
+      try {
+        await player.play();
+        activeButton.disabled = false;
+      } catch (_) {
+        const usedFallback = speakFallback(button);
+        activeButton.disabled = false;
+
+        if (!usedFallback && !autoplay) {
+          showToast("Nao foi possivel iniciar o audio agora.");
+          clearState();
+        }
+
+        if (!usedFallback && autoplay) {
+          showToast("Toque em ouvir para reproduzir a narracao.");
+          clearState();
+        }
+      }
+    };
+
+    player.addEventListener("ended", clearState);
+    player.addEventListener("error", () => {
+      if (!activeButton) return;
+      const button = activeButton;
+      const usedFallback = speakFallback(button);
+      if (!usedFallback) {
+        showToast("Nao foi possivel carregar a narracao.");
+        clearState();
+      }
+    });
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        playVoice(button, false);
+      });
+    });
+
+    const autoplayButton = $("[data-voice-autoplay='true']");
+    if (autoplayButton) {
+      window.setTimeout(() => {
+        playVoice(autoplayButton, true);
+      }, 800);
+    }
+  };
+
   const setupRestaurantes = () => {
     const input = $("[data-rest-search]");
     const cards = $$("[data-rest-card]");
@@ -214,18 +332,20 @@
     const panel = $("[data-admin-panel]");
     if (!panel) return;
 
-    const setTab = (tab) => {
-      $$("[data-admin-tab-button]").forEach((button) => {
-        button.classList.toggle("active", button.dataset.adminTabButton === tab);
+    $$("[data-edit-user]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const form = $("#form-edit-user");
+        if (!form) return;
+        form.elements.id.value = button.dataset.id || "0";
+        form.elements.nome.value = button.dataset.nome || "";
+        form.elements.usuario.value = button.dataset.usuario || "";
+        form.elements.email.value = button.dataset.email || "";
+        form.elements.titulo.value = button.dataset.titulo || "NOVO USUARIO";
+        form.elements.avatar_atual.value = button.dataset.avatar || "";
+        form.elements.is_admin.checked = button.dataset.isAdmin === "1";
+        const preview = $("[data-user-preview]", form);
+        if (preview) preview.src = button.dataset.avatar || "assets/img/avatar-default.svg";
       });
-      $$("[data-admin-tab-panel]").forEach((section) => {
-        section.classList.toggle("hidden", section.dataset.adminTabPanel !== tab);
-      });
-    };
-
-    setTab(panel.dataset.adminActiveTab || "hospedagem");
-    $$("[data-admin-tab-button]").forEach((button) => {
-      button.addEventListener("click", () => setTab(button.dataset.adminTabButton || "hospedagem"));
     });
 
     $$("[data-edit-hospedagem]").forEach((button) => {
@@ -414,8 +534,23 @@
       }
     };
 
-    const takePhoto = $("[data-collect-next]");
-    if (takePhoto) takePhoto.addEventListener("click", () => collect());
+    const uploadForm = $("#form-upload-album-photo");
+    const uploadInput = $("#album-photo-input");
+    if (uploadForm && uploadInput) {
+      uploadInput.addEventListener("change", async () => {
+        if (!uploadInput.files?.length) return;
+        const fd = new FormData(uploadForm);
+        try {
+          const json = await postApi(fd, true);
+          showToast(json.message);
+          window.location.reload();
+        } catch (err) {
+          showToast(err.message);
+        } finally {
+          uploadInput.value = "";
+        }
+      });
+    }
 
     $$("[data-sticker-id]", grid).forEach((item) => {
       item.addEventListener("click", () => collect(item.dataset.stickerId));
@@ -603,6 +738,7 @@
     markActiveBottomTab();
     setupThemeControls();
     setupProgramacaoFilters();
+    setupVoiceGuides();
     setupRestaurantes();
     setupHospedagem();
     setupAdminPanel();

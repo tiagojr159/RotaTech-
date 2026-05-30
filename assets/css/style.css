@@ -225,6 +225,8 @@ a {
   color: #4b3e35;
   font-weight: 700;
   white-space: nowrap;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 .chip.light {
@@ -243,7 +245,10 @@ a {
 .filters-row {
   display: flex;
   gap: 10px;
-  margin-bottom: 14px;
+  margin-bottom: 18px;
+  position: relative;
+  z-index: 3;
+  flex-wrap: wrap;
 }
 
 .scroll-x {
@@ -257,7 +262,7 @@ a {
 
 .quick-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 12px;
   margin-bottom: 16px;
 }
@@ -379,6 +384,15 @@ a {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.chip-filter {
+  cursor: pointer;
+  position: relative;
+  z-index: 4;
+  touch-action: manipulation;
 }
 
 .point-card {

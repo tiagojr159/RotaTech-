@@ -7,7 +7,7 @@ requireAdmin();
 $message = '';
 $error = '';
 $activeAdminTab = sanitize($_POST['admin_tab'] ?? $_GET['tab'] ?? 'hospedagem');
-if (!in_array($activeAdminTab, ['usuarios', 'hospedagem', 'restaurantes', 'eventos'], true)) {
+if (!in_array($activeAdminTab, ['usuarios', 'hospedagem', 'restaurantes', 'eventos', 'relatorios'], true)) {
     $activeAdminTab = 'hospedagem';
 }
 
@@ -15,6 +15,10 @@ $users = readJson('users.json');
 $hospedagens = readJson('hospedagens.json');
 $restaurantes = readJson('restaurantes.json');
 $programacao = readJson('programacao.json');
+$albumFotos = readJson('album_fotos.json');
+$roteiros = readJson('roteiros.json');
+$grupos = readJson('grupos.json');
+$convites = readJson('convites.json');
 
 $nextId = static function (array $rows): int {
     $max = 0;
@@ -244,6 +248,98 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $users = readJson('users.json');
 }
 
+$usuariosAtivos = count($users);
+$fotosAlbumTotal = count($albumFotos);
+$gruposAtivos = count($grupos);
+$convitesPendentes = count(array_filter($convites, fn(array $invite): bool => ($invite['status'] ?? '') === 'pendente'));
+$roteirosAtivos = count(array_filter($roteiros, fn(array $roteiro): bool => !empty($roteiro['itens'] ?? [])));
+$roteirosCompartilhados = 0;
+$favoritosPorEvento = [];
+$usuariosComFavoritos = 0;
+$figurinhasColetadas = 0;
+
+foreach ($users as $userRow) {
+    $favoritosUsuario = $userRow['favoritos'] ?? [];
+    if (!empty($favoritosUsuario)) {
+        $usuariosComFavoritos++;
+    }
+    foreach ($favoritosUsuario as $eventoId) {
+        $eventoId = (int) $eventoId;
+        $favoritosPorEvento[$eventoId] = ($favoritosPorEvento[$eventoId] ?? 0) + 1;
+    }
+    $figurinhasColetadas += count($userRow['figurinhas'] ?? []);
+}
+
+foreach ($roteiros as $roteiro) {
+    foreach (($roteiro['itens'] ?? []) as $item) {
+        if (!empty($item['compartilhado_com_id'])) {
+            $roteirosCompartilhados++;
+        }
+    }
+}
+
+$eventosPorLotacao = [
+    'alta_lotacao' => 0,
+    'movimento_moderado' => 0,
+    'pouco_movimento' => 0,
+];
+$participacaoPorPalco = [];
+$eventosRelatorio = [];
+
+foreach ($programacao as $evento) {
+    $eventoId = (int) ($evento['id'] ?? 0);
+    $palco = (string) ($evento['palco'] ?? 'Palco nao informado');
+    $artista = (string) ($evento['artista'] ?? 'Evento');
+    $lotacao = (string) ($evento['lotacao'] ?? 'movimento_moderado');
+    $favoritos = (int) ($favoritosPorEvento[$eventoId] ?? 0);
+    $matchesRoteiro = 0;
+
+    foreach ($roteiros as $roteiro) {
+        foreach (($roteiro['itens'] ?? []) as $item) {
+            $titulo = mb_strtolower((string) ($item['titulo'] ?? ''));
+            $local = mb_strtolower((string) ($item['local'] ?? ''));
+            if (
+                $titulo !== '' && str_contains($titulo, mb_strtolower($artista))
+                || $local !== '' && str_contains($local, mb_strtolower($palco))
+            ) {
+                $matchesRoteiro++;
+            }
+        }
+    }
+
+    $pesoLotacao = match ($lotacao) {
+        'alta_lotacao' => 22,
+        'movimento_moderado' => 14,
+        'pouco_movimento' => 8,
+        default => 10,
+    };
+
+    if (isset($eventosPorLotacao[$lotacao])) {
+        $eventosPorLotacao[$lotacao]++;
+    }
+
+    $scoreParticipacao = ($favoritos * 4) + ($matchesRoteiro * 3) + $pesoLotacao;
+    $participacaoPorPalco[$palco] = ($participacaoPorPalco[$palco] ?? 0) + $scoreParticipacao;
+
+    $eventosRelatorio[] = [
+        'artista' => $artista,
+        'palco' => $palco,
+        'data' => (string) ($evento['data'] ?? ''),
+        'horario' => (string) ($evento['horario'] ?? ''),
+        'favoritos' => $favoritos,
+        'roteiros' => $matchesRoteiro,
+        'lotacao' => lotacaoLabel($lotacao),
+        'score' => $scoreParticipacao,
+    ];
+}
+
+usort($eventosRelatorio, fn(array $a, array $b): int => $b['score'] <=> $a['score']);
+arsort($participacaoPorPalco);
+
+$engajamentoMedio = $usuariosAtivos > 0 ? (int) round((($usuariosComFavoritos + $fotosAlbumTotal + $roteirosAtivos) / $usuariosAtivos) * 100) : 0;
+$topPalcos = array_slice($participacaoPorPalco, 0, 3, true);
+$topEventos = array_slice($eventosRelatorio, 0, 5);
+
 $showTopBar = true;
 $backUrl = 'home.php';
 $pageTitle = 'Administrador';
@@ -264,6 +360,7 @@ include __DIR__ . '/includes/header.php';
         <a href="admin.php?tab=hospedagem" class="admin-tab-btn <?= $activeAdminTab === 'hospedagem' ? 'active' : ''; ?>"><i class="fa-solid fa-bed"></i><span>Hoteis e pousadas</span></a>
         <a href="admin.php?tab=restaurantes" class="admin-tab-btn <?= $activeAdminTab === 'restaurantes' ? 'active' : ''; ?>"><i class="fa-solid fa-utensils"></i><span>Restaurantes</span></a>
         <a href="admin.php?tab=eventos" class="admin-tab-btn <?= $activeAdminTab === 'eventos' ? 'active' : ''; ?>"><i class="fa-solid fa-calendar-days"></i><span>Eventos</span></a>
+        <a href="admin.php?tab=relatorios" class="admin-tab-btn <?= $activeAdminTab === 'relatorios' ? 'active' : ''; ?>"><i class="fa-solid fa-chart-line"></i><span>Relatorio</span></a>
     </nav>
 
     <section class="admin-section <?= $activeAdminTab === 'usuarios' ? '' : 'hidden'; ?>">
@@ -425,6 +522,106 @@ include __DIR__ . '/includes/header.php';
                 </article>
             <?php endforeach; ?>
         </div>
+    </section>
+
+    <section class="admin-section <?= $activeAdminTab === 'relatorios' ? '' : 'hidden'; ?> admin-report-section" data-admin-report>
+        <div class="section-head admin-section-head">
+            <div>
+                <h3>Relatorio do publico</h3>
+                <p class="muted">Indicadores estimados com base em usuarios, favoritos, roteiros, grupos e fotos do album.</p>
+            </div>
+            <button type="button" class="btn btn-primary" data-print-report><i class="fa-solid fa-file-pdf"></i> Baixar PDF</button>
+        </div>
+
+        <div class="admin-report-grid">
+            <article class="card admin-report-card">
+                <small>Usuarios ativos</small>
+                <strong><?= $usuariosAtivos; ?></strong>
+                <span><?= $usuariosComFavoritos; ?> com favoritos salvos</span>
+            </article>
+            <article class="card admin-report-card">
+                <small>Fotos enviadas</small>
+                <strong><?= $fotosAlbumTotal; ?></strong>
+                <span>Album compartilhado pela galera</span>
+            </article>
+            <article class="card admin-report-card">
+                <small>Roteiros ativos</small>
+                <strong><?= $roteirosAtivos; ?></strong>
+                <span><?= $roteirosCompartilhados; ?> itens compartilhados</span>
+            </article>
+            <article class="card admin-report-card">
+                <small>Grupos e convites</small>
+                <strong><?= $gruposAtivos; ?></strong>
+                <span><?= $convitesPendentes; ?> convites pendentes</span>
+            </article>
+        </div>
+
+        <article class="card admin-report-highlight">
+            <h4>Resumo executivo</h4>
+            <p>Engajamento medio estimado: <strong><?= $engajamentoMedio; ?>%</strong></p>
+            <p>Figurinhas coletadas pela base: <strong><?= $figurinhasColetadas; ?></strong></p>
+            <p>Eventos com alta lotacao: <strong><?= $eventosPorLotacao['alta_lotacao']; ?></strong></p>
+            <p>Eventos com movimento moderado: <strong><?= $eventosPorLotacao['movimento_moderado']; ?></strong></p>
+        </article>
+
+        <div class="admin-report-columns">
+            <article class="card">
+                <h4>Palcos com maior participacao</h4>
+                <div class="stack-list">
+                    <?php foreach ($topPalcos as $palco => $score): ?>
+                        <div class="admin-report-row">
+                            <span><?= sanitize((string) $palco); ?></span>
+                            <strong><?= (int) $score; ?> pts</strong>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </article>
+
+            <article class="card">
+                <h4>Top eventos por interesse</h4>
+                <div class="stack-list">
+                    <?php foreach ($topEventos as $evento): ?>
+                        <div class="admin-report-row admin-report-row-block">
+                            <div>
+                                <strong><?= sanitize((string) $evento['artista']); ?></strong>
+                                <small><?= sanitize((string) $evento['palco']); ?> · <?= sanitize((string) $evento['horario']); ?></small>
+                            </div>
+                            <span><?= (int) $evento['score']; ?> pts</span>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </article>
+        </div>
+
+        <article class="card">
+            <h4>Detalhamento dos eventos</h4>
+            <div class="admin-report-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Evento</th>
+                            <th>Palco</th>
+                            <th>Favoritos</th>
+                            <th>Roteiros</th>
+                            <th>Lotacao</th>
+                            <th>Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($eventosRelatorio as $evento): ?>
+                            <tr>
+                                <td><?= sanitize((string) $evento['artista']); ?></td>
+                                <td><?= sanitize((string) $evento['palco']); ?></td>
+                                <td><?= (int) $evento['favoritos']; ?></td>
+                                <td><?= (int) $evento['roteiros']; ?></td>
+                                <td><?= sanitize((string) $evento['lotacao']); ?></td>
+                                <td><?= (int) $evento['score']; ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </article>
     </section>
 </section>
 

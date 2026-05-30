@@ -10,6 +10,6 @@
     <circle cx='640' cy='140' r='120' fill='#fff'/>
     <circle cx='160' cy='650' r='160' fill='#000'/>
   </g>
-  <text x='400' y='390' fill='white' font-family='Segoe UI,Arial' font-size='120' font-weight='700' text-anchor='middle'>??</text>
+  <image x='250' y='170' width='300' height='300' href='../../logomarca.png' preserveAspectRatio='xMidYMid meet'/>
   <text x='400' y='470' fill='white' font-family='Segoe UI,Arial' font-size='46' font-weight='700' text-anchor='middle'>Caravana</text>
 </svg>

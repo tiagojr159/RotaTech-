@@ -2251,6 +2251,97 @@ textarea::placeholder {
   color: #fff;
 }
 
+.admin-report-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admin-report-card small,
+.admin-report-highlight p,
+.admin-report-row small {
+  color: var(--muted);
+}
+
+.admin-report-card strong {
+  display: block;
+  margin: 8px 0 4px;
+  font-size: 34px;
+  line-height: 0.95;
+  font-family: "Baloo 2", system-ui;
+  color: var(--primary);
+}
+
+.admin-report-highlight h4,
+.admin-report-columns h4,
+.admin-report-table h4 {
+  margin: 0 0 12px;
+}
+
+.admin-report-columns {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-report-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-report-row:last-child {
+  border-bottom: 0;
+}
+
+.admin-report-row-block {
+  align-items: flex-start;
+}
+
+.admin-report-row-block div {
+  display: grid;
+  gap: 4px;
+}
+
+.admin-report-table {
+  overflow-x: auto;
+}
+
+.admin-report-table table {
+  width: 100%;
+  min-width: 620px;
+  border-collapse: collapse;
+}
+
+.admin-report-table th,
+.admin-report-table td {
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  font-size: 14px;
+}
+
+.admin-report-table th {
+  color: var(--primary);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+@media (min-width: 860px) {
+  .admin-report-columns {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .admin-report-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .admin-section-head {
   margin-bottom: 12px;
 }

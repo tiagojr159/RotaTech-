@@ -507,6 +507,15 @@
         form.elements.descricao.value = button.dataset.descricao || "";
       });
     });
+
+    $("[data-print-report]")?.addEventListener("click", () => {
+      document.body.classList.add("report-print-mode");
+      window.print();
+    });
+
+    window.addEventListener("afterprint", () => {
+      document.body.classList.remove("report-print-mode");
+    });
   };
 
   const setupModals = () => {

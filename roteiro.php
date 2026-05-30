@@ -7,6 +7,7 @@ requireLogin();
 $user = currentUser();
 $roteiros = readJson('roteiros.json');
 $grupos = readJson('grupos.json');
+$users = readJson('users.json');
 $myGroup = null;
 foreach ($grupos as $grupo) {
     if (in_array((int) $user['id'], $grupo['membros'] ?? [], true)) {
@@ -25,6 +26,16 @@ foreach ($roteiros as $roteiro) {
         $roteiroGrupo = $roteiro;
     }
 }
+
+$usuariosParaCompartilhar = array_values(array_filter(
+    $users,
+    fn(array $item): bool => (int) ($item['id'] ?? 0) !== (int) $user['id']
+));
+
+$roteiroCompartilhado = array_values(array_filter(
+    $meuRoteiro['itens'] ?? [],
+    fn(array $item): bool => !empty($item['compartilhado_com_id'])
+));
 
 $textoRoteiroPessoal = '';
 if (!empty($meuRoteiro['itens'])) {
@@ -106,6 +117,9 @@ include __DIR__ . '/includes/header.php';
                     <?php if (!empty($item['sugerido_por'])): ?>
                         <small>Sugerido por <?= sanitize($item['sugerido_por']); ?></small>
                     <?php endif; ?>
+                    <?php if (!empty($item['compartilhado_com_nome'])): ?>
+                        <small>Compartilhado com <?= sanitize((string) $item['compartilhado_com_nome']); ?></small>
+                    <?php endif; ?>
                 </div>
                 <button class="icon-btn soft" data-remove-roteiro data-item-id="<?= (int) $item['id']; ?>" data-roteiro-id="<?= (int) ($meuRoteiro['id'] ?? 0); ?>">
                     <i class="fa-solid fa-trash"></i>
@@ -131,6 +145,62 @@ include __DIR__ . '/includes/header.php';
             </div>
             <i class="fa-solid fa-angle-right"></i>
         </a>
+    <?php endif; ?>
+    <article class="card">
+        <h3>Montar roteiro com outro usuario</h3>
+        <p class="muted">Pesquise a pessoa e compartilhe um item para ele aparecer no roteiro dos dois.</p>
+        <?php if (!empty($usuariosParaCompartilhar)): ?>
+            <form id="form-add-group-item">
+                <label>Pesquisar usuario</label>
+                <input
+                    type="text"
+                    id="group-user-search"
+                    list="group-user-options"
+                    placeholder="Digite o nome ou @usuario"
+                    autocomplete="off"
+                    required
+                >
+                <datalist id="group-user-options">
+                    <?php foreach ($usuariosParaCompartilhar as $shareUser): ?>
+                        <option
+                            value="<?= sanitize((string) $shareUser['nome'] . ' (@' . (string) $shareUser['usuario'] . ')'); ?>"
+                            data-user-id="<?= (int) $shareUser['id']; ?>"
+                        ></option>
+                    <?php endforeach; ?>
+                </datalist>
+                <input type="hidden" name="partner_user_id" id="group-user-id">
+                <input type="hidden" name="tipo" value="grupo">
+                <label>Horario</label>
+                <input type="time" name="horario" required>
+                <label>Titulo</label>
+                <input type="text" name="titulo" placeholder="Ex: Show de Forro" required>
+                <label>Local</label>
+                <input type="text" name="local" placeholder="Ex: Palco Multicultural" required>
+                <label>Tipo</label>
+                <select name="categoria">
+                    <option value="show">Show</option>
+                    <option value="gastronomia">Gastronomia</option>
+                    <option value="ponto">Ponto turistico</option>
+                </select>
+                <button class="btn btn-primary btn-xl" type="submit">Compartilhar roteiro</button>
+            </form>
+        <?php else: ?>
+            <p class="muted">Nenhum outro usuario disponivel para compartilhar no momento.</p>
+        <?php endif; ?>
+    </article>
+    <?php if (!empty($roteiroCompartilhado)): ?>
+        <div class="stack-list">
+            <?php foreach ($roteiroCompartilhado as $item): ?>
+                <article class="card roteiro-card">
+                    <div>
+                        <p class="time-title"><?= sanitize((string) ($item['horario'] ?? '')); ?></p>
+                        <h3><?= sanitize((string) ($item['titulo'] ?? '')); ?></h3>
+                        <p><i class="fa-solid fa-location-dot"></i> <?= sanitize((string) ($item['local'] ?? '')); ?></p>
+                        <small>Compartilhado com <?= sanitize((string) ($item['compartilhado_com_nome'] ?? 'outro usuario')); ?></small>
+                    </div>
+                </article>
+            <?php endforeach; ?>
+        </div>
     <?php endif; ?>
     <div class="stack-list">
         <?php foreach ($roteiroGrupo['itens'] ?? [] as $item): ?>

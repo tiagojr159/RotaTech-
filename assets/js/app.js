@@ -617,8 +617,25 @@
 
     const groupForm = $("#form-add-group-item");
     if (groupForm) {
+      const searchInput = $("#group-user-search", groupForm);
+      const hiddenUserId = $("#group-user-id", groupForm);
+      const syncSelectedUser = () => {
+        const selected = $$("option", $("#group-user-options", groupForm)).find(
+          (option) => option.value === searchInput?.value
+        );
+        hiddenUserId.value = selected?.dataset.userId || "";
+      };
+      searchInput?.addEventListener("input", syncSelectedUser);
+      searchInput?.addEventListener("change", syncSelectedUser);
+
       groupForm.addEventListener("submit", async (e) => {
         e.preventDefault();
+        syncSelectedUser();
+        if (!hiddenUserId?.value) {
+          showToast("Escolha um usuario da lista para compartilhar.");
+          searchInput?.focus();
+          return;
+        }
         const fd = new FormData(groupForm);
         fd.append("action", "adicionar_roteiro");
         try {

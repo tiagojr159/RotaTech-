@@ -140,12 +140,101 @@ switch ($action) {
         $local = sanitize($_POST['local'] ?? '');
         $categoria = sanitize($_POST['categoria'] ?? 'show');
         $grupoId = (int) ($_POST['grupo_id'] ?? 0);
+        $partnerUserId = (int) ($_POST['partner_user_id'] ?? 0);
 
         if ($horario === '' || $titulo === '' || $local === '') {
             jsonResponse(['ok' => false, 'message' => 'Preencha horário, título e local'], 422);
         }
 
         $roteiros = readJson('roteiros.json');
+        if ($tipo === 'grupo' && $partnerUserId > 0) {
+            if ($partnerUserId === (int) $current['id']) {
+                jsonResponse(['ok' => false, 'message' => 'Escolha outro usuario para compartilhar'], 422);
+            }
+
+            $partnerUser = null;
+            foreach ($users as $candidate) {
+                if ((int) ($candidate['id'] ?? 0) === $partnerUserId) {
+                    $partnerUser = $candidate;
+                    break;
+                }
+            }
+
+            if ($partnerUser === null) {
+                jsonResponse(['ok' => false, 'message' => 'Usuario selecionado nao foi encontrado'], 404);
+            }
+
+            $currentIndex = null;
+            $partnerIndex = null;
+            foreach ($roteiros as $i => $roteiro) {
+                if (($roteiro['tipo'] ?? '') !== 'pessoal') {
+                    continue;
+                }
+                if ((int) ($roteiro['user_id'] ?? 0) === (int) $current['id']) {
+                    $currentIndex = $i;
+                }
+                if ((int) ($roteiro['user_id'] ?? 0) === $partnerUserId) {
+                    $partnerIndex = $i;
+                }
+            }
+
+            if ($currentIndex === null) {
+                $roteiros[] = [
+                    'id' => generateId(),
+                    'user_id' => (int) $current['id'],
+                    'tipo' => 'pessoal',
+                    'grupo_id' => null,
+                    'itens' => [],
+                ];
+                $currentIndex = array_key_last($roteiros);
+            }
+
+            if ($partnerIndex === null) {
+                $roteiros[] = [
+                    'id' => generateId(),
+                    'user_id' => $partnerUserId,
+                    'tipo' => 'pessoal',
+                    'grupo_id' => null,
+                    'itens' => [],
+                ];
+                $partnerIndex = array_key_last($roteiros);
+            }
+
+            $fromName = explode(' ', (string) ($current['nome'] ?? 'Voce'))[0] ?? 'Voce';
+            $partnerName = explode(' ', (string) ($partnerUser['nome'] ?? 'Participante'))[0] ?? 'Participante';
+
+            $roteiros[$currentIndex]['itens'][] = [
+                'id' => generateId(),
+                'horario' => $horario,
+                'titulo' => $titulo,
+                'local' => $local,
+                'tipo' => $categoria,
+                'sugerido_por' => $fromName,
+                'status' => 'pendente',
+                'compartilhado_com_id' => $partnerUserId,
+                'compartilhado_com_nome' => $partnerName,
+                'compartilhado_por_id' => (int) $current['id'],
+                'compartilhado_por_nome' => $fromName,
+            ];
+
+            $roteiros[$partnerIndex]['itens'][] = [
+                'id' => generateId(),
+                'horario' => $horario,
+                'titulo' => $titulo,
+                'local' => $local,
+                'tipo' => $categoria,
+                'sugerido_por' => $fromName,
+                'status' => 'pendente',
+                'compartilhado_com_id' => (int) $current['id'],
+                'compartilhado_com_nome' => $fromName,
+                'compartilhado_por_id' => (int) $current['id'],
+                'compartilhado_por_nome' => $fromName,
+            ];
+
+            writeJson('roteiros.json', $roteiros);
+            jsonResponse(['ok' => true, 'message' => 'Roteiro compartilhado com ' . $partnerName . '!']);
+        }
+
         $targetIdx = null;
         foreach ($roteiros as $i => $roteiro) {
             if ($tipo === 'grupo' && (int) ($roteiro['grupo_id'] ?? 0) === $grupoId && ($roteiro['tipo'] ?? '') === 'grupo') {
@@ -244,7 +333,7 @@ switch ($action) {
         break;
 
     case 'upload_album_photo':
-        $imagem = uploadImage('album_photo');
+        $imagem = uploadAlbumPhotoWithRandomFrame('album_photo');
         if ($imagem === null) {
             jsonResponse(['ok' => false, 'message' => 'Selecione uma imagem valida para enviar.'], 422);
         }

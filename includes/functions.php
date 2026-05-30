@@ -143,6 +143,118 @@ function uploadImage($fieldName): ?string
     return 'uploads/' . $filename;
 }
 
+function uploadAlbumPhotoWithRandomFrame(string $fieldName): ?string
+{
+    if (empty($_FILES[$fieldName]['name'])) {
+        return null;
+    }
+
+    $file = $_FILES[$fieldName];
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+        return null;
+    }
+
+    if (($file['size'] ?? 0) > 5 * 1024 * 1024) {
+        return null;
+    }
+
+    $allowed = ['jpg', 'jpeg', 'png', 'webp'];
+    $ext = strtolower(pathinfo((string) $file['name'], PATHINFO_EXTENSION));
+    if (!in_array($ext, $allowed, true)) {
+        return null;
+    }
+
+    $imageInfo = @getimagesize($file['tmp_name']);
+    if ($imageInfo === false) {
+        return null;
+    }
+
+    $frameFiles = glob(BASE_PATH . DIRECTORY_SEPARATOR . 'filtros' . DIRECTORY_SEPARATOR . '*.png') ?: [];
+    if ($frameFiles === []) {
+        return uploadImage($fieldName);
+    }
+
+    if (!function_exists('imagecreatefromstring') || !function_exists('imagepng')) {
+        return uploadImage($fieldName);
+    }
+
+    $sourceBinary = @file_get_contents($file['tmp_name']);
+    if ($sourceBinary === false) {
+        return null;
+    }
+
+    $framePath = $frameFiles[array_rand($frameFiles)];
+    $frameBinary = @file_get_contents($framePath);
+    if ($frameBinary === false) {
+        return null;
+    }
+
+    $sourceImage = @imagecreatefromstring($sourceBinary);
+    $frameImage = @imagecreatefromstring($frameBinary);
+    if (!$sourceImage || !$frameImage) {
+        if ($sourceImage) {
+            imagedestroy($sourceImage);
+        }
+        if ($frameImage) {
+            imagedestroy($frameImage);
+        }
+        return null;
+    }
+
+    $frameWidth = imagesx($frameImage);
+    $frameHeight = imagesy($frameImage);
+    $sourceWidth = imagesx($sourceImage);
+    $sourceHeight = imagesy($sourceImage);
+
+    if ($frameWidth < 1 || $frameHeight < 1 || $sourceWidth < 1 || $sourceHeight < 1) {
+        imagedestroy($sourceImage);
+        imagedestroy($frameImage);
+        return null;
+    }
+
+    $canvas = imagecreatetruecolor($frameWidth, $frameHeight);
+    imagealphablending($canvas, false);
+    imagesavealpha($canvas, true);
+    $transparent = imagecolorallocatealpha($canvas, 0, 0, 0, 127);
+    imagefill($canvas, 0, 0, $transparent);
+
+    $scale = max($frameWidth / $sourceWidth, $frameHeight / $sourceHeight);
+    $targetWidth = (int) ceil($sourceWidth * $scale);
+    $targetHeight = (int) ceil($sourceHeight * $scale);
+    $targetX = (int) floor(($frameWidth - $targetWidth) / 2);
+    $targetY = (int) floor(($frameHeight - $targetHeight) / 2);
+
+    imagecopyresampled(
+        $canvas,
+        $sourceImage,
+        $targetX,
+        $targetY,
+        0,
+        0,
+        $targetWidth,
+        $targetHeight,
+        $sourceWidth,
+        $sourceHeight
+    );
+
+    imagealphablending($canvas, true);
+    imagecopy($canvas, $frameImage, 0, 0, 0, 0, $frameWidth, $frameHeight);
+
+    $filename = 'album_' . time() . '_' . random_int(1000, 9999) . '.png';
+    $target = UPLOADS_PATH . DIRECTORY_SEPARATOR . $filename;
+    $saved = imagepng($canvas, $target);
+
+    imagedestroy($canvas);
+    imagedestroy($sourceImage);
+    imagedestroy($frameImage);
+
+    if (!$saved) {
+        return null;
+    }
+
+    return 'uploads/' . $filename;
+}
+
 function jsonResponse($data, $status = 200): void
 {
     http_response_code((int) $status);

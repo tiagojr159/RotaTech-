@@ -7,7 +7,7 @@ requireAdmin();
 $message = '';
 $error = '';
 $activeAdminTab = sanitize($_POST['admin_tab'] ?? $_GET['tab'] ?? 'hospedagem');
-if (!in_array($activeAdminTab, ['usuarios', 'hospedagem', 'restaurantes', 'eventos', 'relatorios'], true)) {
+if (!in_array($activeAdminTab, ['usuarios', 'hospedagem', 'restaurantes', 'eventos', 'relatorios', 'album'], true)) {
     $activeAdminTab = 'hospedagem';
 }
 
@@ -242,10 +242,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    if ($action === 'delete_album_photo') {
+        $fotoId = (int) ($_POST['foto_id'] ?? 0);
+        $deleted = false;
+
+        foreach ($albumFotos as $index => $foto) {
+            if ((int) ($foto['id'] ?? 0) !== $fotoId) {
+                continue;
+            }
+
+            $imagePath = (string) ($foto['imagem'] ?? '');
+            if ($imagePath !== '' && str_starts_with($imagePath, 'uploads/')) {
+                $absolutePath = BASE_PATH . DIRECTORY_SEPARATOR . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $imagePath);
+                if (is_file($absolutePath)) {
+                    @unlink($absolutePath);
+                }
+            }
+
+            unset($albumFotos[$index]);
+            $deleted = true;
+            break;
+        }
+
+        if ($deleted) {
+            $albumFotos = array_values($albumFotos);
+            writeJson('album_fotos.json', $albumFotos);
+            $message = 'Foto da galera apagada.';
+        } else {
+            $error = 'Foto nao encontrada.';
+        }
+    }
+
     $hospedagens = readJson('hospedagens.json');
     $restaurantes = readJson('restaurantes.json');
     $programacao = readJson('programacao.json');
     $users = readJson('users.json');
+    $albumFotos = readJson('album_fotos.json');
 }
 
 $usuariosAtivos = count($users);
@@ -307,12 +339,14 @@ foreach ($programacao as $evento) {
         }
     }
 
-    $pesoLotacao = match ($lotacao) {
-        'alta_lotacao' => 22,
-        'movimento_moderado' => 14,
-        'pouco_movimento' => 8,
-        default => 10,
-    };
+    $pesoLotacao = 10;
+    if ($lotacao === 'alta_lotacao') {
+        $pesoLotacao = 22;
+    } elseif ($lotacao === 'movimento_moderado') {
+        $pesoLotacao = 14;
+    } elseif ($lotacao === 'pouco_movimento') {
+        $pesoLotacao = 8;
+    }
 
     if (isset($eventosPorLotacao[$lotacao])) {
         $eventosPorLotacao[$lotacao]++;
@@ -360,6 +394,7 @@ include __DIR__ . '/includes/header.php';
         <a href="admin.php?tab=hospedagem" class="admin-tab-btn <?= $activeAdminTab === 'hospedagem' ? 'active' : ''; ?>"><i class="fa-solid fa-bed"></i><span>Hoteis e pousadas</span></a>
         <a href="admin.php?tab=restaurantes" class="admin-tab-btn <?= $activeAdminTab === 'restaurantes' ? 'active' : ''; ?>"><i class="fa-solid fa-utensils"></i><span>Restaurantes</span></a>
         <a href="admin.php?tab=eventos" class="admin-tab-btn <?= $activeAdminTab === 'eventos' ? 'active' : ''; ?>"><i class="fa-solid fa-calendar-days"></i><span>Eventos</span></a>
+        <a href="admin.php?tab=album" class="admin-tab-btn <?= $activeAdminTab === 'album' ? 'active' : ''; ?>"><i class="fa-solid fa-images"></i><span>Fotos da galera</span></a>
         <a href="admin.php?tab=relatorios" class="admin-tab-btn <?= $activeAdminTab === 'relatorios' ? 'active' : ''; ?>"><i class="fa-solid fa-chart-line"></i><span>Relatorio</span></a>
     </nav>
 
@@ -522,6 +557,39 @@ include __DIR__ . '/includes/header.php';
                 </article>
             <?php endforeach; ?>
         </div>
+    </section>
+
+    <section class="admin-section <?= $activeAdminTab === 'album' ? '' : 'hidden'; ?>">
+        <div class="section-head admin-section-head">
+            <h3>Fotos da galera</h3>
+            <span class="muted"><?= count($albumFotos); ?> fotos no album</span>
+        </div>
+        <div class="admin-photo-grid">
+            <?php foreach (array_reverse($albumFotos) as $foto): ?>
+                <article class="card admin-photo-card">
+                    <img src="<?= sanitize((string) ($foto['imagem'] ?? '')); ?>" alt="<?= sanitize((string) ($foto['user_name'] ?? 'Foto enviada')); ?>" class="admin-photo-thumb">
+                    <div class="admin-photo-copy">
+                        <strong><?= sanitize((string) ($foto['user_name'] ?? 'Visitante')); ?></strong>
+                        <small><?= sanitize((string) ($foto['created_at'] ?? 'Agora')); ?></small>
+                    </div>
+                    <form method="post" class="admin-photo-delete-form" onsubmit="return confirm('Apagar esta foto da galera?');">
+                        <input type="hidden" name="action" value="delete_album_photo">
+                        <input type="hidden" name="admin_tab" value="album">
+                        <input type="hidden" name="foto_id" value="<?= (int) ($foto['id'] ?? 0); ?>">
+                        <button type="submit" class="icon-btn danger" aria-label="Apagar foto">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </form>
+                </article>
+            <?php endforeach; ?>
+        </div>
+        <?php if (empty($albumFotos)): ?>
+            <article class="empty-card">
+                <i class="fa-regular fa-image"></i>
+                <h4>Nenhuma foto no album</h4>
+                <p>As fotos enviadas pelos usuarios vao aparecer aqui para moderacao.</p>
+            </article>
+        <?php endif; ?>
     </section>
 
     <section class="admin-section <?= $activeAdminTab === 'relatorios' ? '' : 'hidden'; ?> admin-report-section" data-admin-report>

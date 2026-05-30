@@ -1,9 +1,9 @@
 {
   "name": "RotaTech Arcoverde",
   "short_name": "RotaTech",
-  "id": "/rotatech/",
-  "start_url": "/rotatech/",
-  "scope": "/rotatech/",
+  "id": "https://ki6.com.br/rotatech/",
+  "start_url": "https://ki6.com.br/rotatech/",
+  "scope": "https://ki6.com.br/rotatech/",
   "display": "standalone",
   "background_color": "#f8f1e8",
   "theme_color": "#c96f2b",

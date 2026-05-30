@@ -613,13 +613,37 @@ a {
 
 .auth-wrap {
   text-align: center;
-  padding: 6px 8px 36px;
+  padding: 0 8px 36px;
+}
+
+.auth-hero {
+  position: relative;
+  margin: 0 -8px;
+  padding: 12px 18px 132px;
+  background:
+    linear-gradient(180deg, rgba(30, 17, 10, 0.18) 0%, rgba(30, 17, 10, 0.58) 72%, rgba(248, 241, 232, 0.96) 100%),
+    url("../../noite_arcoverde.jpeg") center top / cover no-repeat;
+  overflow: hidden;
+}
+
+.auth-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255, 207, 120, 0.28), transparent 28%),
+    radial-gradient(circle at 82% 14%, rgba(201, 111, 43, 0.24), transparent 24%);
+  pointer-events: none;
+}
+
+.auth-hero > * {
+  position: relative;
+  z-index: 1;
 }
 
 .flags-top {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 18px;
 }
 
 .flag {
@@ -644,6 +668,12 @@ a {
   background: #fff;
 }
 
+.auth-logo-badge {
+  width: 102px;
+  height: 102px;
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.22);
+}
+
 .logo-lg {
   width: 112px;
   height: 112px;
@@ -659,21 +689,32 @@ a {
 .splash-title {
   margin: 6px 0 2px;
   font-family: "Baloo 2", system-ui;
-  color: var(--primary);
+  color: #fff5ea;
   font-size: 52px;
   line-height: 0.95;
+  text-shadow: 0 10px 24px rgba(0, 0, 0, 0.32);
 }
 
 .auth-sub {
-  margin: 0 0 12px;
-  letter-spacing: 1px;
+  margin: 0;
+  letter-spacing: 1.6px;
   font-size: 16px;
+  color: rgba(255, 247, 236, 0.92);
 }
 
 .auth-card {
   text-align: left;
   padding: 18px 14px;
   background: #f4eee5;
+}
+
+.auth-card-floating {
+  margin-top: -84px;
+  position: relative;
+  z-index: 2;
+  border-radius: 22px;
+  box-shadow: 0 24px 60px rgba(58, 34, 20, 0.16);
+  backdrop-filter: blur(4px);
 }
 
 .input-icon {

@@ -32,16 +32,19 @@ $pageClass = 'auth-screen';
 include __DIR__ . '/includes/header.php';
 ?>
 <section class="auth-wrap">
-    <div class="flags-top">
-        <span class="flag c1"></span><span class="flag c2"></span><span class="flag c3"></span><span class="flag c4"></span><span class="flag c5"></span>
+    <div class="auth-hero">
+        <div class="auth-hero-overlay"></div>
+        <div class="flags-top">
+            <span class="flag c1"></span><span class="flag c2"></span><span class="flag c3"></span><span class="flag c4"></span><span class="flag c5"></span>
+        </div>
+        <div class="logo-badge auth-logo-badge">
+            <img src="logomarca.png" alt="RotaTech Arcoverde">
+        </div>
+        <h2 class="auth-title">SAO JOAO 2026</h2>
+        <p class="auth-sub">ARCOVERDE • PERNAMBUCO</p>
     </div>
-    <div class="logo-badge">
-        <img src="logomarca.png" alt="RotaTech Arcoverde">
-    </div>
-    <h2 class="auth-title">SAO JOAO 2026</h2>
-    <p class="auth-sub">ARCOVERDE • PERNAMBUCO</p>
 
-    <form class="card auth-card" method="post" autocomplete="on">
+    <form class="card auth-card auth-card-floating" method="post" autocomplete="on">
         <?php if ($error): ?>
             <p class="alert alert-danger"><?= sanitize($error); ?></p>
         <?php endif; ?>

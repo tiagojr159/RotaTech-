@@ -319,18 +319,39 @@
   const setupAlbumPhotoModal = () => {
     const photoModal = $("#modal-album-photo");
     const photoPreview = $("#album-photo-preview");
-    if (!photoModal || !photoPreview) return;
+    const photoLoading = $("#album-photo-loading");
+    if (!photoModal || !photoPreview || !photoLoading) return;
 
     $$("[data-open-album-photo]").forEach((trigger) => {
       trigger.addEventListener("click", () => {
-        photoPreview.src = trigger.dataset.albumPhotoSrc || "";
+        const originalSrc = trigger.dataset.albumPhotoSrc || "";
+        const separator = originalSrc.includes("?") ? "&" : "?";
+        const previewSrc = `${originalSrc}${separator}modal=1&t=${Date.now()}`;
+
+        photoLoading.classList.remove("hidden");
+        photoPreview.classList.add("hidden");
         photoPreview.alt = trigger.dataset.albumPhotoAlt || "Foto do album";
+        photoPreview.src = previewSrc;
       });
+    });
+
+    photoPreview.addEventListener("load", () => {
+      photoLoading.classList.add("hidden");
+      photoPreview.classList.remove("hidden");
+    });
+
+    photoPreview.addEventListener("error", () => {
+      photoLoading.textContent = "Nao foi possivel carregar a foto ampliada.";
+      photoLoading.classList.remove("hidden");
+      photoPreview.classList.add("hidden");
     });
 
     $$("[data-close-modal]", photoModal).forEach((button) => {
       button.addEventListener("click", () => {
         photoModal.classList.add("hidden");
+        photoLoading.textContent = "Carregando foto...";
+        photoLoading.classList.remove("hidden");
+        photoPreview.classList.add("hidden");
         photoPreview.removeAttribute("src");
         photoPreview.alt = "";
       });

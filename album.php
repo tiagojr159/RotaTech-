@@ -78,6 +78,7 @@ include __DIR__ . '/includes/header.php';
             <button type="button" class="btn btn-light" data-close-modal>Fechar</button>
         </div>
         <div class="album-photo-stage">
+            <div class="album-photo-loading" id="album-photo-loading">Carregando foto...</div>
             <img src="" alt="" id="album-photo-preview">
         </div>
     </div>

@@ -28,18 +28,18 @@ $avatar = $current['avatar'] ?? 'assets/img/avatar-default.svg';
     <meta name="apple-mobile-web-app-title" content="RotaTech">
     <title><?= sanitize($pageTitle); ?> - RotaTech</title>
     <base href="<?= sanitize(APP_BASE_URL); ?>">
-    <link rel="manifest" href="<?= sanitize(APP_BASE_URL); ?>manifest.json?v=1.0.3">
+    <link rel="manifest" href="<?= sanitize(APP_BASE_URL); ?>manifest.json?v=1.0.4">
     <link rel="apple-touch-icon" href="<?= sanitize(APP_BASE_URL); ?>logomarca.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito+Sans:opsz,wght@6..12,400;6..12,500;6..12,600;6..12,700;6..12,800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
-    <link rel="stylesheet" href="assets/css/style.css?v=1.0.5">
+    <link rel="stylesheet" href="assets/css/style.css?v=1.0.6">
     <script>
         window.APP_BASE_URL = "<?= sanitize(APP_BASE_URL); ?>";
         window.APP_ABSOLUTE_URL = "<?= sanitize(APP_ABSOLUTE_URL); ?>";
     </script>
-    <script defer src="assets/js/app.js?v=1.0.3"></script>
+    <script defer src="assets/js/app.js?v=1.0.4"></script>
 </head>
 <body class="<?= sanitize($bodyClass); ?>">
 <div class="app-shell">

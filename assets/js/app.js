@@ -50,6 +50,23 @@
     });
   };
 
+  const setupPasswordToggles = () => {
+    $$("[data-password-button]").forEach((button) => {
+      const wrapper = button.closest(".input-icon");
+      const input = wrapper?.querySelector("[data-password-toggle]");
+      const icon = $("i", button);
+      if (!input || !icon) return;
+
+      button.addEventListener("click", () => {
+        const showing = input.type === "text";
+        input.type = showing ? "password" : "text";
+        button.setAttribute("aria-pressed", String(!showing));
+        button.setAttribute("aria-label", showing ? "Mostrar senha" : "Ocultar senha");
+        icon.className = showing ? "fa-regular fa-eye" : "fa-regular fa-eye-slash";
+      });
+    });
+  };
+
   const setupProgramacaoFilters = () => {
     const cards = $$("[data-event-card]");
     if (!cards.length) return;
@@ -476,6 +493,7 @@
     setupRoteiroToggle();
     setupProfileEdit();
     setupToastButtons();
+    setupPasswordToggles();
     setupPwaInstall();
   });
 })();

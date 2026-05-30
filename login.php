@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
     }
-    $error = 'Dados inválidos. Tente novamente.';
+    $error = 'Dados invalidos. Tente novamente.';
 }
 
 $showTopBar = false;
@@ -36,16 +36,16 @@ include __DIR__ . '/includes/header.php';
         <span class="flag c1"></span><span class="flag c2"></span><span class="flag c3"></span><span class="flag c4"></span><span class="flag c5"></span>
     </div>
     <div class="logo-badge">
-        <img src="assets/img/logo-saojoao.svg" alt="São João 2026">
+        <img src="assets/img/logo-saojoao.svg" alt="Sao Joao 2026">
     </div>
-    <h2 class="auth-title">SÃO JOÃO 2026</h2>
+    <h2 class="auth-title">SAO JOAO 2026</h2>
     <p class="auth-sub">ARCOVERDE • PERNAMBUCO</p>
 
     <form class="card auth-card" method="post" autocomplete="on">
         <?php if ($error): ?>
             <p class="alert alert-danger"><?= sanitize($error); ?></p>
         <?php endif; ?>
-        <label>Email ou Usuário</label>
+        <label>Email ou Usuario</label>
         <div class="input-icon">
             <i class="fa-regular fa-user"></i>
             <input type="text" name="login" placeholder="cordel@arcoverde.com" required>
@@ -56,7 +56,10 @@ include __DIR__ . '/includes/header.php';
         </div>
         <div class="input-icon">
             <i class="fa-solid fa-lock"></i>
-            <input type="password" name="senha" placeholder="••••••••" required>
+            <input type="password" name="senha" placeholder="********" required data-password-toggle>
+            <button type="button" class="password-toggle" data-password-button aria-label="Mostrar senha" aria-pressed="false">
+                <i class="fa-regular fa-eye"></i>
+            </button>
         </div>
         <button class="btn btn-primary btn-xl" type="submit">Entrar</button>
         <div class="divider"><span>OU ENTRE COM</span></div>
@@ -65,7 +68,7 @@ include __DIR__ . '/includes/header.php';
             <button class="btn btn-light" type="button"><i class="fa-brands fa-apple"></i> Apple</button>
         </div>
     </form>
-    <p class="signup-note">Ainda não tem conta?</p>
+    <p class="signup-note">Ainda nao tem conta?</p>
     <a href="cadastro.php" class="signup-link">Criar Cadastro</a>
     <div class="icons-foot">
         <i class="fa-solid fa-leaf"></i><i class="fa-solid fa-fire"></i><i class="fa-solid fa-music"></i>

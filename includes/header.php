@@ -35,7 +35,7 @@ $avatar = $current['avatar'] ?? 'assets/img/avatar-default.svg';
         window.APP_BASE_URL = "<?= sanitize(APP_BASE_URL); ?>";
         window.APP_ABSOLUTE_URL = "<?= sanitize(APP_ABSOLUTE_URL); ?>";
     </script>
-    <script defer src="assets/js/app.js?v=1.0.0"></script>
+    <script defer src="assets/js/app.js?v=1.0.1"></script>
 </head>
 <body class="<?= sanitize($bodyClass); ?>">
 <div class="app-shell">

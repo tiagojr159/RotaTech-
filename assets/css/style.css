@@ -556,6 +556,18 @@ a {
   color: #443831;
 }
 
+.password-toggle {
+  border: 0;
+  background: transparent;
+  color: #8a6f5b;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+}
+
 label {
   font-weight: 800;
   color: #4f4138;
@@ -1721,4 +1733,3 @@ label {
     padding-bottom: 20px;
   }
 }
-

@@ -1,16 +1,7 @@
-const CACHE_NAME = "rotatech-arcoverde-v3";
-const OFFLINE_URL = "index.php";
+const CACHE_NAME = "rotatech-arcoverde-v4";
 
 const ASSETS_TO_CACHE = [
-  "index.php",
-  "login.php",
-  "home.php",
-  "programacao.php",
-  "restaurantes.php",
-  "album.php",
-  "roteiro.php",
-  "grupos.php",
-  "perfil.php",
+  "manifest.json",
   "assets/css/style.css",
   "assets/js/app.js",
   "assets/img/logo-rotatech.svg",
@@ -40,16 +31,29 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
+  const requestUrl = new URL(event.request.url);
+  const isSameOrigin = requestUrl.origin === self.location.origin;
+  const isPhpRequest = requestUrl.pathname.endsWith(".php");
+  const isNavigationRequest = event.request.mode === "navigate";
+
+  if (isNavigationRequest || (isSameOrigin && isPhpRequest)) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;
       return fetch(event.request)
         .then((response) => {
+          if (!response.ok || response.type !== "basic") {
+            return response;
+          }
+
           const copy = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
           return response;
-        })
-        .catch(() => caches.match(OFFLINE_URL));
+        });
     })
   );
 });

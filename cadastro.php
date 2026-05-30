@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($exists) {
-            $error = 'Email ou usuário já cadastrado.';
+            $error = 'Email ou usuario ja cadastrado.';
         } else {
             $users[] = [
                 'id' => generateId(),
@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'figurinhas' => [1],
             ];
             writeJson('users.json', $users);
-            $message = 'Cadastro concluído! Agora faça login.';
+            $message = 'Cadastro concluido! Agora faca login.';
         }
     }
 }
@@ -64,15 +64,21 @@ include __DIR__ . '/includes/header.php';
     <form class="card stacked-form" method="post">
         <label>Nome completo</label>
         <input type="text" name="nome" placeholder="Ex: Ana Pereira" required>
-        <label>Usuário</label>
+        <label>Usuario</label>
         <input type="text" name="usuario" placeholder="@anapereira" required>
         <label>Email</label>
         <input type="email" name="email" placeholder="ana@email.com" required>
         <label>Senha</label>
-        <input type="password" name="senha" placeholder="mínimo 6 caracteres" required minlength="6">
+        <div class="input-icon">
+            <i class="fa-solid fa-lock"></i>
+            <input type="password" name="senha" placeholder="minimo 6 caracteres" required minlength="6" data-password-toggle>
+            <button type="button" class="password-toggle" data-password-button aria-label="Mostrar senha" aria-pressed="false">
+                <i class="fa-regular fa-eye"></i>
+            </button>
+        </div>
         <button class="btn btn-primary btn-xl" type="submit">Criar Conta</button>
     </form>
-    <p class="center muted">Já possui conta? <a href="login.php" class="text-link strong">Entrar</a></p>
+    <p class="center muted">Ja possui conta? <a href="login.php" class="text-link strong">Entrar</a></p>
 </section>
 </main>
 </div>

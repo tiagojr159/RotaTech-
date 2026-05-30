@@ -3,7 +3,7 @@
         "id":  1,
         "nome":  "Hotel \u0026 Spa Sertanejo",
         "categoria":  "hotel",
-        "endereco":  "Rua do ComÃ©rcio, 522",
+        "endereco":  "Rua do Comércio, 522",
         "cidade":  "Arcoverde, Pernambuco",
         "latitude":  -7.288292,
         "longitude":  -36.464315
@@ -46,7 +46,7 @@
     },
     {
         "id":  6,
-        "nome":  "Hotel Flor do SertÃ£o",
+        "nome":  "Hotel Flor do Sertão",
         "categoria":  "hotel",
         "endereco":  "Rua da Matriz, 433",
         "cidade":  "Arcoverde, Pernambuco",
@@ -66,7 +66,7 @@
         "id":  8,
         "nome":  "Hotel Ponta Verde",
         "categoria":  "hotel",
-        "endereco":  "Rua SÃ£o JosÃ©, 391",
+        "endereco":  "Rua São José, 391",
         "cidade":  "Arcoverde, Pernambuco",
         "latitude":  -9.150924,
         "longitude":  -35.902561
@@ -91,7 +91,7 @@
     },
     {
         "id":  11,
-        "nome":  "Hotel SertÃ£o Azul",
+        "nome":  "Hotel Sertão Azul",
         "categoria":  "hotel",
         "endereco":  "Rua Nova, 882",
         "cidade":  "Arcoverde, Pernambuco",
@@ -100,7 +100,7 @@
     },
     {
         "id":  12,
-        "nome":  "Hotel SÃ£o Pedro",
+        "nome":  "Hotel São Pedro",
         "categoria":  "hotel",
         "endereco":  "Rua da Paz, 697",
         "cidade":  "Arcoverde, Pernambuco",
@@ -118,7 +118,7 @@
     },
     {
         "id":  14,
-        "nome":  "Hotel do ComÃ©rcio",
+        "nome":  "Hotel do Comércio",
         "categoria":  "hotel",
         "endereco":  "Rua da Matriz, 907",
         "cidade":  "Arcoverde, Pernambuco",
@@ -145,7 +145,7 @@
     },
     {
         "id":  17,
-        "nome":  "Pousada BelÃ­ssima",
+        "nome":  "Pousada Belíssima",
         "categoria":  "pousada",
         "endereco":  "Rua das Flores, 501",
         "cidade":  "Arcoverde, Pernambuco",
@@ -172,7 +172,7 @@
     },
     {
         "id":  20,
-        "nome":  "Pousada ChalÃ© do Vale",
+        "nome":  "Pousada Chalé do Vale",
         "categoria":  "pousada",
         "endereco":  "Rua Boa Vista, 246",
         "cidade":  "Arcoverde, Pernambuco",
@@ -208,7 +208,7 @@
     },
     {
         "id":  24,
-        "nome":  "Pousada RefÃºgio",
+        "nome":  "Pousada Refúgio",
         "categoria":  "pousada",
         "endereco":  "Rua do Mercado, 498",
         "cidade":  "Arcoverde, Pernambuco",
@@ -217,7 +217,7 @@
     },
     {
         "id":  25,
-        "nome":  "Pousada Rota do SertÃ£o",
+        "nome":  "Pousada Rota do Sertão",
         "categoria":  "pousada",
         "endereco":  "Rua Central, 779",
         "cidade":  "Arcoverde, Pernambuco",
@@ -237,7 +237,7 @@
         "id":  27,
         "nome":  "Pousada Sertaneja",
         "categoria":  "pousada",
-        "endereco":  "Rua do ComÃ©rcio, 132",
+        "endereco":  "Rua do Comércio, 132",
         "cidade":  "Arcoverde, Pernambuco",
         "latitude":  -7.698195,
         "longitude":  -36.250593
@@ -253,7 +253,7 @@
     },
     {
         "id":  29,
-        "nome":  "Pousada do SertÃ£o",
+        "nome":  "Pousada do Sertão",
         "categoria":  "pousada",
         "endereco":  "Rua Nova, 170",
         "cidade":  "Arcoverde, Pernambuco",

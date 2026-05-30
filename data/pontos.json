@@ -1,25 +1,25 @@
 ﻿[
     {
         "id":  1,
-        "nome":  "Posto de SaÃºde",
+        "nome":  "Posto de Saúde",
         "tipo":  "saude",
-        "local":  "AtrÃ¡s do Palco Principal",
+        "local":  "Atrás do Palco Principal",
         "distancia":  "150m",
         "cor":  "#22c55e",
         "icone":  "fa-briefcase-medical"
     },
     {
         "id":  2,
-        "nome":  "SanitÃ¡rios Premium",
+        "nome":  "Sanitários Premium",
         "tipo":  "sanitario",
-        "local":  "PraÃ§a de AlimentaÃ§Ã£o",
+        "local":  "Praça de Alimentação",
         "distancia":  "50m",
         "cor":  "#c96f2b",
         "icone":  "fa-restroom"
     },
     {
         "id":  3,
-        "nome":  "Base de SeguranÃ§a",
+        "nome":  "Base de Segurança",
         "tipo":  "seguranca",
         "local":  "Entrada Sul",
         "distancia":  "300m",
@@ -28,7 +28,7 @@
     },
     {
         "id":  4,
-        "nome":  "Ponto de TÃ¡xi",
+        "nome":  "Ponto de Táxi",
         "tipo":  "mobilidade",
         "local":  "Rua da Feira",
         "distancia":  "220m",
@@ -48,7 +48,7 @@
         "id":  6,
         "nome":  "Achados e Perdidos",
         "tipo":  "apoio",
-        "local":  "Central de ServiÃ§os",
+        "local":  "Central de Serviços",
         "distancia":  "180m",
         "cor":  "#7c3aed",
         "icone":  "fa-box-open"

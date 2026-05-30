@@ -65,11 +65,6 @@ include __DIR__ . '/includes/header.php';
             </button>
         </div>
         <button class="btn btn-primary btn-xl" type="submit">Entrar</button>
-        <div class="divider"><span>OU ENTRE COM</span></div>
-        <div class="social-grid">
-            <button class="btn btn-light" type="button"><i class="fa-brands fa-google"></i> Google</button>
-            <button class="btn btn-light" type="button"><i class="fa-brands fa-apple"></i> Apple</button>
-        </div>
     </form>
     <p class="signup-note">Ainda nao tem conta?</p>
     <a href="cadastro.php" class="signup-link">Criar Cadastro</a>

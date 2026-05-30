@@ -15,19 +15,31 @@ $pageClass = 'splash-screen';
 include __DIR__ . '/includes/header.php';
 ?>
 <section class="splash-wrap">
-    <div class="logo-badge logo-lg">
-        <img src="logomarca.png" alt="RotaTech Arcoverde">
+    <div class="splash-hero">
+        <div class="splash-hero-overlay"></div>
+        <div class="splash-badge">Sao Joao 2026</div>
+        <div class="logo-badge logo-lg splash-logo">
+            <img src="logomarca.png" alt="RotaTech Arcoverde">
+        </div>
+        <div class="splash-hero-copy">
+            <p class="splash-kicker">Arcoverde • Pernambuco</p>
+            <h2 class="splash-title">RotaTech<br>Arcoverde</h2>
+            <p class="splash-copy">A tecnologia encontra a tradicao no melhor Sao Joao do mundo, com roteiro, album e experiencias em tempo real.</p>
+        </div>
+        <div class="splash-hero-footer">
+            <span><i class="fa-solid fa-wifi"></i> app em tempo real</span>
+            <span><i class="fa-solid fa-camera-retro"></i> filtros e album</span>
+        </div>
     </div>
-    <h2 class="splash-title">ROTATECH<br>ARCOVERDE</h2>
-    <p class="splash-copy">A tecnologia encontra a tradição no melhor São João do mundo.</p>
-    <div class="hero-preview">
-        <img src="assets/img/hero-fogueira.svg" alt="Fogueira de São João">
+
+    <div class="splash-actions">
+        <a href="login.php" class="btn btn-primary btn-xl">
+            <i class="fa-solid fa-store"></i>
+            Entrar na festa
+        </a>
+        <a href="login.php" class="link-inline">Ja tenho conta <i class="fa-solid fa-arrow-right"></i></a>
     </div>
-    <a href="login.php" class="btn btn-primary btn-xl">
-        <i class="fa-solid fa-store"></i>
-        Entrar na festa
-    </a>
-    <a href="login.php" class="link-inline">Entrar com conta <i class="fa-solid fa-arrow-right"></i></a>
+
     <p class="footer-mini">ROTATECH • ARCOVERDE 2026</p>
 </section>
 </main>

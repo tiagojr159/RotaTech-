@@ -2,6 +2,27 @@
   const $ = (s, root = document) => root.querySelector(s);
   const $$ = (s, root = document) => Array.from(root.querySelectorAll(s));
   const THEME_KEY = "rotatech-theme";
+  const VOICE_KEY = "rotatech-voice-enabled";
+
+  const isVoiceEnabled = () => {
+    try {
+      return (localStorage.getItem(VOICE_KEY) || "on") !== "off";
+    } catch (_) {
+      return true;
+    }
+  };
+
+  const applyVoicePreference = (enabled) => {
+    const value = enabled ? "on" : "off";
+    try {
+      localStorage.setItem(VOICE_KEY, value);
+    } catch (_) {}
+
+    $$("[data-voice-option]").forEach((button) => {
+      const shouldBeActive = button.dataset.voiceOption === value;
+      button.classList.toggle("active", shouldBeActive);
+    });
+  };
 
   const showToast = (message) => {
     if (!message) return;
@@ -74,6 +95,24 @@
     $$("[data-theme-option]").forEach((button) => {
       button.addEventListener("click", () => {
         applyTheme(button.dataset.themeOption || "normal");
+      });
+    });
+  };
+
+  const setupVoiceControls = () => {
+    applyVoicePreference(isVoiceEnabled());
+    $$("[data-voice-option]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const enabled = (button.dataset.voiceOption || "on") === "on";
+        applyVoicePreference(enabled);
+
+        if (!enabled) {
+          try {
+            if ("speechSynthesis" in window) {
+              window.speechSynthesis.cancel();
+            }
+          } catch (_) {}
+        }
       });
     });
   };
@@ -204,6 +243,13 @@
     };
 
     const playVoice = async (button, autoplay = false) => {
+      if (!isVoiceEnabled()) {
+        if (!autoplay) {
+          showToast("A voz esta desligada no perfil.");
+        }
+        return;
+      }
+
       if (activeButton === button) {
         stopAll();
         return;
@@ -274,13 +320,11 @@
     const photoPreview = $("#album-photo-preview");
     if (!photoModal || !photoPreview) return;
 
-    document.addEventListener("click", (event) => {
-      const trigger = event.target.closest("[data-open-album-photo]");
-      if (!trigger) return;
-
-      photoPreview.src = trigger.dataset.albumPhotoSrc || "";
-      photoPreview.alt = trigger.dataset.albumPhotoAlt || "Foto do album";
-      photoModal.classList.remove("hidden");
+    $$("[data-open-album-photo]").forEach((trigger) => {
+      trigger.addEventListener("click", () => {
+        photoPreview.src = trigger.dataset.albumPhotoSrc || "";
+        photoPreview.alt = trigger.dataset.albumPhotoAlt || "Foto do album";
+      });
     });
 
     $$("[data-close-modal]", photoModal).forEach((button) => {
@@ -850,6 +894,7 @@
   document.addEventListener("DOMContentLoaded", () => {
     markActiveBottomTab();
     setupThemeControls();
+    setupVoiceControls();
     setupProgramacaoFilters();
     setupVoiceGuides();
     setupAlbumPhotoModal();

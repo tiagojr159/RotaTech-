@@ -55,6 +55,7 @@ include __DIR__ . '/includes/header.php';
             <button
                 type="button"
                 class="album-photo-trigger"
+                data-open-modal="modal-album-photo"
                 data-open-album-photo
                 data-album-photo-src="<?= sanitize((string) $foto['imagem']); ?>"
                 data-album-photo-alt="<?= sanitize((string) ($foto['user_name'] ?? 'Foto enviada')); ?>"

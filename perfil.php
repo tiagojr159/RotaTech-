@@ -81,6 +81,16 @@ include __DIR__ . '/includes/header.php';
                 <span>Dark</span>
             </button>
         </div>
+        <div class="theme-switcher" data-voice-switcher>
+            <button type="button" class="theme-option active" data-voice-option="on">
+                <i class="fa-solid fa-volume-high"></i>
+                <span>Voz ligada</span>
+            </button>
+            <button type="button" class="theme-option" data-voice-option="off">
+                <i class="fa-solid fa-volume-xmark"></i>
+                <span>Voz desligada</span>
+            </button>
+        </div>
         <form id="form-edit-profile" class="stacked-form profile-edit-form">
             <div class="profile-avatar-editor">
                 <img src="<?= sanitize($user['avatar']); ?>" alt="<?= sanitize($user['nome']); ?>" class="profile-avatar-preview">

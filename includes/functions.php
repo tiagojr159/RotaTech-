@@ -23,6 +23,11 @@ function readJson($file): array
         return [];
     }
 
+    // Accept UTF-8 JSON files saved with BOM by Windows editors/PowerShell.
+    if (strncmp($content, "\xEF\xBB\xBF", 3) === 0) {
+        $content = substr($content, 3);
+    }
+
     $decoded = json_decode($content, true);
     return is_array($decoded) ? $decoded : [];
 }

@@ -161,6 +161,26 @@
       clearState();
     };
 
+    const findPreferredBrowserVoice = () => {
+      if (!("speechSynthesis" in window)) {
+        return null;
+      }
+
+      const voices = window.speechSynthesis.getVoices() || [];
+      const preferredPatterns = [/antonio/i, /ant[oô]nio/i, /fabio/i, /ricardo/i];
+
+      for (const pattern of preferredPatterns) {
+        const matched = voices.find((voice) => pattern.test(`${voice.name} ${voice.voiceURI}`));
+        if (matched) {
+          return matched;
+        }
+      }
+
+      return voices.find((voice) => /^pt-BR/i.test(voice.lang))
+        || voices.find((voice) => /^pt/i.test(voice.lang))
+        || null;
+    };
+
     const speakFallback = (button) => {
       const text = button.dataset.voiceText || "";
       if (!text || !("speechSynthesis" in window)) {
@@ -171,6 +191,10 @@
       utterance.lang = "pt-BR";
       utterance.rate = 0.96;
       utterance.pitch = 1;
+      const preferredVoice = findPreferredBrowserVoice();
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
+      }
       utterance.onend = clearState;
       utterance.onerror = clearState;
       activeUtterance = utterance;
@@ -243,6 +267,29 @@
         playVoice(autoplayButton, true);
       }, 800);
     }
+  };
+
+  const setupAlbumPhotoModal = () => {
+    const photoModal = $("#modal-album-photo");
+    const photoPreview = $("#album-photo-preview");
+    if (!photoModal || !photoPreview) return;
+
+    document.addEventListener("click", (event) => {
+      const trigger = event.target.closest("[data-open-album-photo]");
+      if (!trigger) return;
+
+      photoPreview.src = trigger.dataset.albumPhotoSrc || "";
+      photoPreview.alt = trigger.dataset.albumPhotoAlt || "Foto do album";
+      photoModal.classList.remove("hidden");
+    });
+
+    $$("[data-close-modal]", photoModal).forEach((button) => {
+      button.addEventListener("click", () => {
+        photoModal.classList.add("hidden");
+        photoPreview.removeAttribute("src");
+        photoPreview.alt = "";
+      });
+    });
   };
 
   const setupRestaurantes = () => {
@@ -556,17 +603,6 @@
       item.addEventListener("click", () => collect(item.dataset.stickerId));
     });
 
-    const photoModal = $("#modal-album-photo");
-    const photoPreview = $("#album-photo-preview");
-    if (photoModal && photoPreview) {
-      $$("[data-open-album-photo]").forEach((button) => {
-        button.addEventListener("click", () => {
-          photoPreview.src = button.dataset.albumPhotoSrc || "";
-          photoPreview.alt = button.dataset.albumPhotoAlt || "Foto do album";
-          photoModal.classList.remove("hidden");
-        });
-      });
-    }
   };
 
   const setupFavoritos = () => {
@@ -816,6 +852,7 @@
     setupThemeControls();
     setupProgramacaoFilters();
     setupVoiceGuides();
+    setupAlbumPhotoModal();
     setupRestaurantes();
     setupHospedagem();
     setupAdminPanel();

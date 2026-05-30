@@ -14,6 +14,12 @@ if (!file_exists(__DIR__ . '/vendor/autoload.php')) {
 
 require_once __DIR__ . '/vendor/autoload.php';
 
+const ANTONIO_TECH_VOICE_CANDIDATES = [
+    'pt-BR-AntonioNeural',
+    'pt-BR-AntonioMultilingualNeural',
+    'pt-BR-FranciscaNeural',
+];
+
 function voiceSafeText(string $text): string
 {
     $text = trim(preg_replace('/\s+/', ' ', $text));
@@ -84,6 +90,36 @@ function buildRoteiroVoiceText(array $user, string $scope): string
         : 'Voce ainda nao criou um roteiro pessoal.';
 }
 
+function synthesizeAntonioTechVoice(EdgeTTS $tts, string $text, string $baseFile): string
+{
+    $lastError = null;
+
+    foreach (ANTONIO_TECH_VOICE_CANDIDATES as $voice) {
+        try {
+            $tts->synthesize($text, $voice, [
+                'rate' => '-6%',
+                'volume' => '+0%',
+                'pitch' => '+0Hz',
+            ]);
+            $tts->toFile($baseFile);
+
+            if (file_exists($baseFile . '.mp3')) {
+                return $voice;
+            }
+        } catch (\Throwable $e) {
+            $lastError = $e;
+            @unlink($baseFile . '.mp3');
+            @unlink($baseFile . '.webm');
+        }
+    }
+
+    if ($lastError instanceof \Throwable) {
+        throw $lastError;
+    }
+
+    throw new RuntimeException('Nenhuma voz disponivel para Antonio Tech.');
+}
+
 $context = (string) ($_GET['context'] ?? '');
 $scope = (string) ($_GET['scope'] ?? 'pessoal');
 $user = currentUser();
@@ -108,18 +144,19 @@ if (!is_dir($ttsDir)) {
     mkdir($ttsDir, 0775, true);
 }
 
-$cacheKey = md5($context . '|' . $scope . '|' . (string) $user['id'] . '|' . $text);
+$voiceProfile = 'antonio_tech';
+$cacheKey = md5($voiceProfile . '|' . $context . '|' . $scope . '|' . (string) $user['id'] . '|' . $text);
 $baseFile = $ttsDir . DIRECTORY_SEPARATOR . $cacheKey;
 $audioFile = $baseFile . '.mp3';
 
 if (!file_exists($audioFile)) {
-    $tts = new EdgeTTS();
-    $tts->synthesize($text, 'pt-BR-FranciscaNeural', [
-        'rate' => '-6%',
-        'volume' => '+0%',
-        'pitch' => '+0Hz',
-    ]);
-    $tts->toFile($baseFile);
+    try {
+        $tts = new EdgeTTS();
+        synthesizeAntonioTechVoice($tts, $text, $baseFile);
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        exit('Nao foi possivel gerar o audio do Antonio Tech.');
+    }
 }
 
 if (!file_exists($audioFile)) {

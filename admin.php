@@ -246,7 +246,16 @@ include __DIR__ . '/includes/header.php';
         <?php if ($error): ?><p class="alert alert-danger"><?= sanitize($error); ?></p><?php endif; ?>
     </article>
 
-    <form class="card stacked-form" method="post">
+    <nav class="admin-menu card card-soft">
+        <a href="#admin-usuarios" class="admin-menu-item"><i class="fa-solid fa-users"></i><span>Usuarios</span></a>
+        <a href="#admin-restaurantes" class="admin-menu-item"><i class="fa-solid fa-utensils"></i><span>Restaurantes</span></a>
+        <a href="#admin-hospedagem" class="admin-menu-item"><i class="fa-solid fa-bed"></i><span>Hospedagem</span></a>
+        <a href="#admin-eventos" class="admin-menu-item"><i class="fa-solid fa-calendar-days"></i><span>Eventos</span></a>
+        <a href="#admin-album" class="admin-menu-item"><i class="fa-regular fa-images"></i><span>Album</span></a>
+        <a href="#admin-roteiro" class="admin-menu-item"><i class="fa-regular fa-map"></i><span>Roteiro</span></a>
+    </nav>
+
+    <form class="card stacked-form" method="post" id="admin-usuarios">
         <h4>Cadastrar Usuario</h4>
         <input type="hidden" name="action" value="create_user">
         <label>Nome</label>
@@ -277,7 +286,7 @@ include __DIR__ . '/includes/header.php';
         </form>
     <?php endif; ?>
 
-    <form class="card stacked-form" method="post">
+    <form class="card stacked-form" method="post" id="admin-restaurantes">
         <h4>Cadastrar Restaurante</h4>
         <input type="hidden" name="action" value="add_restaurante">
         <label>Nome</label><input type="text" name="nome" required>
@@ -292,7 +301,7 @@ include __DIR__ . '/includes/header.php';
         <button class="btn btn-primary btn-xl" type="submit">Salvar Restaurante</button>
     </form>
 
-    <form class="card stacked-form" method="post">
+    <form class="card stacked-form" method="post" id="admin-hospedagem">
         <h4>Cadastrar Hospedagem</h4>
         <input type="hidden" name="action" value="add_hospedagem">
         <label>Nome</label><input type="text" name="nome" required>
@@ -308,7 +317,7 @@ include __DIR__ . '/includes/header.php';
         <button class="btn btn-primary btn-xl" type="submit">Salvar Hospedagem</button>
     </form>
 
-    <form class="card stacked-form" method="post">
+    <form class="card stacked-form" method="post" id="admin-eventos">
         <h4>Cadastrar Evento</h4>
         <input type="hidden" name="action" value="add_evento">
         <label>Artista / Evento</label><input type="text" name="artista" required>
@@ -320,7 +329,7 @@ include __DIR__ . '/includes/header.php';
         <button class="btn btn-primary btn-xl" type="submit">Salvar Evento</button>
     </form>
 
-    <form class="card stacked-form" method="post">
+    <form class="card stacked-form" method="post" id="admin-album">
         <h4>Cadastrar Item de Album</h4>
         <input type="hidden" name="action" value="add_album">
         <label>Titulo</label><input type="text" name="titulo" required>
@@ -329,7 +338,7 @@ include __DIR__ . '/includes/header.php';
         <button class="btn btn-primary btn-xl" type="submit">Salvar Item</button>
     </form>
 
-    <form class="card stacked-form" method="post">
+    <form class="card stacked-form" method="post" id="admin-roteiro">
         <h4>Cadastrar Roteiro</h4>
         <input type="hidden" name="action" value="add_roteiro">
         <label>Usuario</label>

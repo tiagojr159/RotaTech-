@@ -37,6 +37,7 @@ include __DIR__ . '/includes/header.php';
         </article>
     <?php endforeach; ?>
 </section>
+<p class="center muted hidden" data-hosp-empty>Nenhuma hospedagem encontrada para esse filtro.</p>
 
 <?php include __DIR__ . '/includes/bottom-nav.php'; ?>
 </main>

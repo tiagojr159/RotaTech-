@@ -12,7 +12,8 @@ $collected = $user['figurinhas'] ?? [];
 
 $activeTab = 'perfil';
 $pageTitle = 'Perfil';
-$rightHtml = '<button class="icon-btn" data-open-modal="modal-edit-profile"><i class="fa-solid fa-gear"></i></button>';
+$adminIcon = isAdminUser($user) ? '<a href="admin.php" class="icon-btn soft" aria-label="Administrador"><i class="fa-solid fa-shield-halved"></i></a>' : '';
+$rightHtml = $adminIcon . '<button class="icon-btn" data-open-modal="modal-edit-profile"><i class="fa-solid fa-gear"></i></button>';
 include __DIR__ . '/includes/header.php';
 ?>
 <section class="profile-top">
@@ -71,7 +72,7 @@ include __DIR__ . '/includes/header.php';
     <div class="modal-backdrop" data-close-modal></div>
     <div class="modal-content">
         <h3>Editar Perfil</h3>
-        <form id="form-edit-profile">
+        <form id="form-edit-profile" class="stacked-form profile-edit-form">
             <label>Nome</label>
             <input type="text" name="nome" value="<?= sanitize($user['nome']); ?>" required>
             <label>Usuário</label>
@@ -89,4 +90,3 @@ include __DIR__ . '/includes/header.php';
 </div>
 </body>
 </html>
-

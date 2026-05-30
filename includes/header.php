@@ -23,9 +23,13 @@ $avatar = $current['avatar'] ?? 'assets/img/avatar-default.svg';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#c96f2b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="RotaTech">
     <title><?= sanitize($pageTitle); ?> - RotaTech</title>
     <base href="<?= sanitize(APP_BASE_URL); ?>">
     <link rel="manifest" href="<?= sanitize(APP_BASE_URL); ?>manifest.json?v=1.0.3">
+    <link rel="apple-touch-icon" href="<?= sanitize(APP_BASE_URL); ?>logomarca.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito+Sans:opsz,wght@6..12,400;6..12,500;6..12,600;6..12,700;6..12,800&display=swap" rel="stylesheet">

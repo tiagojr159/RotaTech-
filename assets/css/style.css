@@ -1333,14 +1333,23 @@ textarea::placeholder {
   font-size: 26px;
 }
 
+.album-photo-stage {
+  position: relative;
+  width: 100%;
+  min-height: 58dvh;
+  height: 68dvh;
+  max-height: 78dvh;
+  border-radius: 18px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--card-soft) 84%, black 16%);
+}
+
 #album-photo-preview {
   width: 100%;
-  flex: 1;
-  min-height: 58dvh;
-  max-height: 78dvh;
+  height: 100%;
+  display: block;
   object-fit: contain;
-  border-radius: 18px;
-  background: color-mix(in srgb, var(--card-soft) 84%, black 16%);
+  background: transparent;
 }
 
 @media (max-width: 520px) {
@@ -1349,8 +1358,9 @@ textarea::placeholder {
     padding: 12px;
   }
 
-  #album-photo-preview {
+  .album-photo-stage {
     min-height: 52dvh;
+    height: 62dvh;
     max-height: 72dvh;
   }
 }
@@ -2308,6 +2318,28 @@ textarea::placeholder {
   gap: 10px;
 }
 
+.install-banner-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.install-banner-copy strong {
+  font-size: 15px;
+}
+
+.install-banner-copy span {
+  font-size: 12px;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.install-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .install-banner button {
   border: 0;
   background: #d7833f;
@@ -2315,6 +2347,10 @@ textarea::placeholder {
   border-radius: 8px;
   padding: 8px 12px;
   font-weight: 800;
+}
+
+.install-banner-ios {
+  background: #263626;
 }
 
 @media print {

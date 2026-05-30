@@ -3,6 +3,7 @@
   const $$ = (s, root = document) => Array.from(root.querySelectorAll(s));
   const THEME_KEY = "rotatech-theme";
   const VOICE_KEY = "rotatech-voice-enabled";
+  const IOS_INSTALL_DISMISSED_KEY = "rotatech-ios-install-dismissed";
 
   const isVoiceEnabled = () => {
     try {
@@ -847,6 +848,8 @@
   const setupPwaInstall = () => {
     const appBaseUrl = window.APP_BASE_URL || "/rotatech/";
     const postInstallUrl = window.APP_ABSOLUTE_URL || "https://ki6.com.br/rotatech/";
+    const isIos = /iphone|ipad|ipod/i.test(window.navigator.userAgent || "");
+    const isInStandalone = window.matchMedia?.("(display-mode: standalone)")?.matches || window.navigator.standalone === true;
 
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register(`${appBaseUrl}service-worker.js`, {
@@ -861,15 +864,54 @@
       window.location.href = postInstallUrl;
     };
 
+    const removeInstallBanner = () => {
+      $(".install-banner")?.remove();
+    };
+
+    const showIosInstallBanner = () => {
+      try {
+        if (localStorage.getItem(IOS_INSTALL_DISMISSED_KEY) === "1") return;
+      } catch (_) {}
+      if ($(".install-banner")) return;
+
+      const banner = document.createElement("div");
+      banner.className = "install-banner install-banner-ios";
+      banner.innerHTML = `
+        <div class="install-banner-copy">
+          <strong>Instalar no iPhone</strong>
+          <span>Toque em Compartilhar no Safari e depois em Adicionar à Tela de Início.</span>
+        </div>
+        <div class="install-banner-actions">
+          <button type="button" data-dismiss-install>Fechar</button>
+        </div>
+      `;
+
+      $("[data-dismiss-install]", banner)?.addEventListener("click", () => {
+        try {
+          localStorage.setItem(IOS_INSTALL_DISMISSED_KEY, "1");
+        } catch (_) {}
+        banner.remove();
+      });
+
+      document.body.appendChild(banner);
+    };
+
+    if (isIos && !isInStandalone) {
+      showIosInstallBanner();
+    }
+
     let deferredPrompt = null;
     window.addEventListener("beforeinstallprompt", (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      if ($(".install-banner")) return;
+      removeInstallBanner();
       const banner = document.createElement("div");
       banner.className = "install-banner";
       banner.innerHTML = `
-        <div>Instalar app no celular</div>
+        <div class="install-banner-copy">
+          <strong>Instalar app</strong>
+          <span>Adicione o RotaTech na tela inicial do seu celular.</span>
+        </div>
         <button type="button">Instalar</button>
       `;
       const btn = $("button", banner);

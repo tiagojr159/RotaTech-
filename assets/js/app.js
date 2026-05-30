@@ -1,6 +1,7 @@
 (() => {
   const $ = (s, root = document) => root.querySelector(s);
   const $$ = (s, root = document) => Array.from(root.querySelectorAll(s));
+  const THEME_KEY = "rotatech-theme";
 
   const showToast = (message) => {
     if (!message) return;
@@ -48,6 +49,32 @@
     const active = map[file];
     $$("[data-bottom-nav] .nav-item").forEach((item) => {
       item.classList.toggle("active", item.dataset.tab === active);
+    });
+  };
+
+  const applyTheme = (theme) => {
+    const nextTheme = theme === "dark" ? "dark" : "normal";
+    document.body.dataset.theme = nextTheme;
+    try {
+      localStorage.setItem(THEME_KEY, nextTheme);
+    } catch (_) {}
+
+    $$("[data-theme-option]").forEach((button) => {
+      button.classList.toggle("active", button.dataset.themeOption === nextTheme);
+    });
+  };
+
+  const setupThemeControls = () => {
+    let savedTheme = "normal";
+    try {
+      savedTheme = localStorage.getItem(THEME_KEY) || "normal";
+    } catch (_) {}
+
+    applyTheme(savedTheme);
+    $$("[data-theme-option]").forEach((button) => {
+      button.addEventListener("click", () => {
+        applyTheme(button.dataset.themeOption || "normal");
+      });
     });
   };
 
@@ -508,6 +535,7 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     markActiveBottomTab();
+    setupThemeControls();
     setupProgramacaoFilters();
     setupRestaurantes();
     setupHospedagem();

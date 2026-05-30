@@ -25,10 +25,14 @@ include __DIR__ . '/includes/header.php';
 
 <section class="stack-list" data-hosp-list>
     <?php foreach ($hospedagens as $item): ?>
-        <article class="point-card" data-hosp-card data-hosp-nome="<?= sanitize(mb_strtolower($item['nome'])); ?>" data-hosp-cat="<?= sanitize(mb_strtolower($item['categoria'])); ?>" data-hosp-endereco="<?= sanitize(mb_strtolower($item['endereco'])); ?>">
-            <span class="point-icon" style="background: #1f7a4a22; color: #1f7a4a;">
-                <i class="fa-solid fa-bed"></i>
-            </span>
+        <article class="point-card hospedagem-card" data-hosp-card data-hosp-nome="<?= sanitize(mb_strtolower($item['nome'])); ?>" data-hosp-cat="<?= sanitize(mb_strtolower($item['categoria'])); ?>" data-hosp-endereco="<?= sanitize(mb_strtolower($item['endereco'])); ?>">
+            <?php if (!empty($item['imagem'])): ?>
+                <img src="<?= sanitize($item['imagem']); ?>" alt="<?= sanitize($item['nome']); ?>" class="hospedagem-thumb">
+            <?php else: ?>
+                <span class="point-icon" style="background: #1f7a4a22; color: #1f7a4a;">
+                    <i class="fa-solid fa-bed"></i>
+                </span>
+            <?php endif; ?>
             <div>
                 <h4><?= sanitize($item['nome']); ?></h4>
                 <p><?= sanitize(ucfirst($item['categoria'])); ?> - <?= sanitize($item['endereco']); ?></p>

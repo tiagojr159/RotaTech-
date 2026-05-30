@@ -247,10 +247,14 @@ switch ($action) {
         $nome = sanitize($_POST['nome'] ?? $users[$userIndex]['nome']);
         $usuario = sanitize($_POST['usuario'] ?? $users[$userIndex]['usuario']);
         $titulo = sanitize($_POST['titulo'] ?? $users[$userIndex]['titulo']);
+        $avatar = uploadImage('avatar');
 
         $users[$userIndex]['nome'] = $nome;
         $users[$userIndex]['usuario'] = $usuario;
         $users[$userIndex]['titulo'] = $titulo;
+        if ($avatar !== null) {
+            $users[$userIndex]['avatar'] = $avatar;
+        }
         writeJson('users.json', $users);
         jsonResponse(['ok' => true, 'message' => 'Perfil atualizado com sucesso']);
         break;

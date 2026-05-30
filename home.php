@@ -34,8 +34,16 @@ include __DIR__ . '/includes/header.php';
     <img src="assets/img/hero-fogueira.svg" alt="Fogueira">
     <div class="overlay"></div>
     <div class="hero-content">
-        <p class="hero-location">ARCOVERDE, PE</p>
-        <span class="chip light"><i class="fa-regular fa-sun"></i> 22C</span>
+        <div class="hero-topline">
+            <div class="hero-brand">
+                <img src="logomarca.png" alt="RotaTech Arcoverde" class="hero-logo">
+                <div>
+                    <p class="hero-location">ARCOVERDE, PE</p>
+                    <strong>RotaTech Arcoverde</strong>
+                </div>
+            </div>
+            <span class="chip light"><i class="fa-regular fa-sun"></i> 22C</span>
+        </div>
         <h2>Hoje no Sao Joao</h2>
         <p>24 de Junho - Noite de Sao Joao</p>
     </div>

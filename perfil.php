@@ -12,8 +12,7 @@ $collected = $user['figurinhas'] ?? [];
 
 $activeTab = 'perfil';
 $pageTitle = 'Perfil';
-$adminIcon = isAdminUser($user) ? '<a href="admin.php" class="icon-btn soft" aria-label="Administrador"><i class="fa-solid fa-shield-halved"></i></a>' : '';
-$rightHtml = $adminIcon . '<button class="icon-btn" data-open-modal="modal-edit-profile"><i class="fa-solid fa-gear"></i></button>';
+$rightHtml = '<button class="icon-btn" data-open-modal="modal-edit-profile"><i class="fa-solid fa-gear"></i></button>';
 include __DIR__ . '/includes/header.php';
 ?>
 <section class="profile-top">
@@ -72,7 +71,22 @@ include __DIR__ . '/includes/header.php';
     <div class="modal-backdrop" data-close-modal></div>
     <div class="modal-content">
         <h3>Editar Perfil</h3>
+        <div class="theme-switcher" data-theme-switcher>
+            <button type="button" class="theme-option active" data-theme-option="normal">
+                <i class="fa-regular fa-sun"></i>
+                <span>Normal</span>
+            </button>
+            <button type="button" class="theme-option" data-theme-option="dark">
+                <i class="fa-regular fa-moon"></i>
+                <span>Dark</span>
+            </button>
+        </div>
         <form id="form-edit-profile" class="stacked-form profile-edit-form">
+            <div class="profile-avatar-editor">
+                <img src="<?= sanitize($user['avatar']); ?>" alt="<?= sanitize($user['nome']); ?>" class="profile-avatar-preview">
+                <label class="btn btn-light" for="avatar">Escolher foto</label>
+                <input type="file" id="avatar" name="avatar" accept=".jpg,.jpeg,.png,.webp">
+            </div>
             <label>Nome</label>
             <input type="text" name="nome" value="<?= sanitize($user['nome']); ?>" required>
             <label>Usuário</label>
@@ -80,6 +94,9 @@ include __DIR__ . '/includes/header.php';
             <label>Título</label>
             <input type="text" name="titulo" value="<?= sanitize($user['titulo']); ?>" required>
             <button type="submit" class="btn btn-primary btn-xl">Salvar alterações</button>
+            <?php if (isAdminUser($user)): ?>
+                <a href="admin.php" class="btn btn-light btn-xl"><i class="fa-solid fa-shield-halved"></i> Abrir painel do administrador</a>
+            <?php endif; ?>
         </form>
     </div>
 </div>

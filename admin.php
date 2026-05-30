@@ -123,6 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $cidade = sanitize($_POST['cidade'] ?? 'Arcoverde, Pernambuco');
         $lat = (float) ($_POST['latitude'] ?? 0);
         $lng = (float) ($_POST['longitude'] ?? 0);
+        $imagem = uploadImage('foto_hospedagem');
         if ($nome === '' || $endereco === '') {
             $error = 'Informe nome e endereco da hospedagem.';
         } else {
@@ -134,6 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'cidade' => $cidade,
                 'latitude' => $lat,
                 'longitude' => $lng,
+                'imagem' => $imagem,
             ];
             writeJson('hospedagens.json', $hospedagens);
             $message = 'Hospedagem cadastrada.';
@@ -301,7 +303,7 @@ include __DIR__ . '/includes/header.php';
         <button class="btn btn-primary btn-xl" type="submit">Salvar Restaurante</button>
     </form>
 
-    <form class="card stacked-form" method="post" id="admin-hospedagem">
+    <form class="card stacked-form" method="post" enctype="multipart/form-data" id="admin-hospedagem">
         <h4>Cadastrar Hospedagem</h4>
         <input type="hidden" name="action" value="add_hospedagem">
         <label>Nome</label><input type="text" name="nome" required>
@@ -314,6 +316,7 @@ include __DIR__ . '/includes/header.php';
         <label>Cidade</label><input type="text" name="cidade" value="Arcoverde, Pernambuco">
         <label>Latitude</label><input type="number" step="0.000001" name="latitude">
         <label>Longitude</label><input type="number" step="0.000001" name="longitude">
+        <label>Foto da hospedagem</label><input type="file" name="foto_hospedagem" accept=".jpg,.jpeg,.png,.webp">
         <button class="btn btn-primary btn-xl" type="submit">Salvar Hospedagem</button>
     </form>
 

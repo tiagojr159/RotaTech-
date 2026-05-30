@@ -16,7 +16,7 @@ include __DIR__ . '/includes/header.php';
 ?>
 <section class="splash-wrap">
     <div class="logo-badge logo-lg">
-        <img src="assets/img/logo-rotatech.svg" alt="RotaTech Arcoverde">
+        <img src="logomarca.png" alt="RotaTech Arcoverde">
     </div>
     <h2 class="splash-title">ROTATECH<br>ARCOVERDE</h2>
     <p class="splash-copy">A tecnologia encontra a tradição no melhor São João do mundo.</p>

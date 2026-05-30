@@ -36,7 +36,7 @@ include __DIR__ . '/includes/header.php';
         <span class="flag c1"></span><span class="flag c2"></span><span class="flag c3"></span><span class="flag c4"></span><span class="flag c5"></span>
     </div>
     <div class="logo-badge">
-        <img src="assets/img/logo-saojoao.svg" alt="Sao Joao 2026">
+        <img src="logomarca.png" alt="RotaTech Arcoverde">
     </div>
     <h2 class="auth-title">SAO JOAO 2026</h2>
     <p class="auth-sub">ARCOVERDE • PERNAMBUCO</p>

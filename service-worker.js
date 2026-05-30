@@ -2,6 +2,7 @@ const CACHE_NAME = "rotatech-arcoverde-v4";
 
 const ASSETS_TO_CACHE = [
   "manifest.json",
+  "logomarca.png",
   "assets/css/style.css",
   "assets/js/app.js",
   "assets/img/logo-rotatech.svg",

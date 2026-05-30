@@ -4,6 +4,12 @@
   const THEME_KEY = "rotatech-theme";
   const VOICE_KEY = "rotatech-voice-enabled";
   const IOS_INSTALL_DISMISSED_KEY = "rotatech-ios-install-dismissed";
+  const getAppBaseUrl = () => {
+    if (window.APP_BASE_URL) return window.APP_BASE_URL;
+    const segments = window.location.pathname.split("/").filter(Boolean);
+    return segments.length ? `/${segments[0]}/` : "/";
+  };
+  const getAppAbsoluteUrl = () => window.APP_ABSOLUTE_URL || `${window.location.origin}${getAppBaseUrl()}`;
 
   const isVoiceEnabled = () => {
     try {
@@ -270,7 +276,7 @@
         params.set("scope", button.dataset.voiceScope);
       }
 
-      player.src = `${window.APP_BASE_URL || "/rotatech/"}voice.php?${params.toString()}`;
+      player.src = `${getAppBaseUrl()}voice.php?${params.toString()}`;
 
       try {
         await player.play();
@@ -876,8 +882,8 @@
   };
 
   const setupPwaInstall = () => {
-    const appBaseUrl = window.APP_BASE_URL || "/rotatech/";
-    const postInstallUrl = window.APP_ABSOLUTE_URL || "https://ki6.com.br/rotatech/";
+    const appBaseUrl = getAppBaseUrl();
+    const postInstallUrl = getAppAbsoluteUrl();
     const isIos = /iphone|ipad|ipod/i.test(window.navigator.userAgent || "");
     const isInStandalone = window.matchMedia?.("(display-mode: standalone)")?.matches || window.navigator.standalone === true;
 

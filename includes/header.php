@@ -28,7 +28,7 @@ $avatar = $current['avatar'] ?? 'assets/img/avatar-default.svg';
     <meta name="apple-mobile-web-app-title" content="RotaTech">
     <title><?= sanitize($pageTitle); ?> - RotaTech</title>
     <base href="<?= sanitize(APP_BASE_URL); ?>">
-    <link rel="manifest" href="<?= sanitize(APP_BASE_URL); ?>manifest.json?v=1.0.7">
+    <link rel="manifest" href="<?= sanitize(APP_BASE_URL); ?>manifest.php?v=1.0.8">
     <link rel="apple-touch-icon" href="<?= sanitize(APP_BASE_URL); ?>icon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -39,7 +39,7 @@ $avatar = $current['avatar'] ?? 'assets/img/avatar-default.svg';
         window.APP_BASE_URL = "<?= sanitize(APP_BASE_URL); ?>";
         window.APP_ABSOLUTE_URL = "<?= sanitize(APP_ABSOLUTE_URL); ?>";
     </script>
-    <script defer src="assets/js/app.js?v=1.0.6"></script>
+    <script defer src="assets/js/app.js?v=1.0.7"></script>
 </head>
 <body class="<?= sanitize($bodyClass); ?>">
 <div class="app-shell">

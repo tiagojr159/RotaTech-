@@ -10,6 +10,20 @@ if (!defined('APP_INIT')) {
     define('APP_INIT', true);
 }
 
+if (!function_exists('str_contains')) {
+    function str_contains(string $haystack, string $needle): bool
+    {
+        return $needle === '' || strpos($haystack, $needle) !== false;
+    }
+}
+
+if (!function_exists('str_starts_with')) {
+    function str_starts_with(string $haystack, string $needle): bool
+    {
+        return $needle === '' || strncmp($haystack, $needle, strlen($needle)) === 0;
+    }
+}
+
 date_default_timezone_set('America/Fortaleza');
 session_start();
 
@@ -18,9 +32,37 @@ define('DATA_PATH', BASE_PATH . DIRECTORY_SEPARATOR . 'data');
 define('UPLOADS_PATH', BASE_PATH . DIRECTORY_SEPARATOR . 'uploads');
 define('ASSETS_PATH', BASE_PATH . DIRECTORY_SEPARATOR . 'assets');
 define('APP_NAME', 'RotaTech Arcoverde');
-define('APP_BASE_URL', '/rotatech/');
-define('APP_ABSOLUTE_URL', 'https://ki6.com.br/rotatech/');
 define('MASTER_USER_EMAIL', 'tiagojr159@hotmail.com');
+
+function detectAppBaseUrl(): string
+{
+    $scriptName = str_replace('\\', '/', (string) ($_SERVER['SCRIPT_NAME'] ?? '/'));
+    $basePath = rtrim(str_replace('\\', '/', dirname($scriptName)), '/');
+
+    if ($basePath === '' || $basePath === '.') {
+        return '/';
+    }
+
+    return $basePath . '/';
+}
+
+function detectAppAbsoluteUrl(string $baseUrl): string
+{
+    $host = (string) ($_SERVER['HTTP_HOST'] ?? 'localhost');
+    $https = strtolower((string) ($_SERVER['HTTPS'] ?? '')) === 'on';
+    $forwardedProto = strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? ''));
+    $scheme = ($https || $forwardedProto === 'https') ? 'https' : 'http';
+
+    if (str_contains($host, 'ki6.com.br')) {
+        $scheme = 'https';
+    }
+
+    return $scheme . '://' . $host . $baseUrl;
+}
+
+$appBaseUrl = detectAppBaseUrl();
+define('APP_BASE_URL', $appBaseUrl);
+define('APP_ABSOLUTE_URL', detectAppAbsoluteUrl($appBaseUrl));
 
 if (!is_dir(DATA_PATH)) {
     mkdir(DATA_PATH, 0775, true);

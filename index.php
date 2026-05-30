@@ -16,6 +16,7 @@ include __DIR__ . '/includes/header.php';
 ?>
 <section class="splash-wrap">
     <div class="splash-hero">
+        <img src="noite_arcoverde.jpeg" alt="Noite em Arcoverde" class="splash-hero-bg" loading="eager" fetchpriority="high">
         <div class="splash-hero-overlay"></div>
         <div class="splash-badge">Sao Joao 2026</div>
         <div class="logo-badge logo-lg splash-logo">

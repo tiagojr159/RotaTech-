@@ -283,10 +283,12 @@ a {
 
 .hero-brand {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 12px;
   flex: 1 1 auto;
   min-width: 0;
+  max-width: 170px;
 }
 
 .hero-brand > div {
@@ -297,14 +299,14 @@ a {
 .hero-brand strong {
   display: block;
   color: #fff8ef;
-  font-size: 16px;
-  line-height: 1.1;
-  word-break: break-word;
+  font-size: 17px;
+  line-height: 1.08;
+  word-break: normal;
 }
 
 .hero-logo {
-  width: 56px;
-  height: 56px;
+  width: 94px;
+  height: 94px;
   object-fit: contain;
   border-radius: 16px;
   background: rgba(255, 248, 239, 0.95);
@@ -327,10 +329,10 @@ a {
 
 .hero-location {
   margin: 0 0 4px;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
   color: #ffd5b4;
   font-weight: 800;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.2;
   white-space: normal;
 }
@@ -338,6 +340,7 @@ a {
 .hero-topline .chip {
   flex-shrink: 0;
   align-self: flex-start;
+  margin-top: 2px;
 }
 
 @media (max-width: 380px) {
@@ -347,11 +350,12 @@ a {
 
   .hero-brand {
     gap: 10px;
+    max-width: 142px;
   }
 
   .hero-logo {
-    width: 52px;
-    height: 52px;
+    width: 82px;
+    height: 82px;
   }
 
   .hero-brand strong {
@@ -359,7 +363,7 @@ a {
   }
 
   .hero-location {
-    font-size: 10px;
+    font-size: 11px;
     letter-spacing: 0.6px;
   }
 }
@@ -659,16 +663,25 @@ a {
   position: relative;
   margin: 0 -8px;
   padding: 12px 18px 132px;
-  background:
-    linear-gradient(180deg, rgba(30, 17, 10, 0.18) 0%, rgba(30, 17, 10, 0.58) 72%, rgba(248, 241, 232, 0.96) 100%),
-    url("../../noite_arcoverde.jpeg") center top / cover no-repeat;
   overflow: hidden;
+  background: #2a160d;
+}
+
+.auth-hero-bg,
+.splash-hero-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .auth-hero-overlay {
   position: absolute;
   inset: 0;
   background:
+    linear-gradient(180deg, rgba(30, 17, 10, 0.18) 0%, rgba(30, 17, 10, 0.58) 72%, rgba(248, 241, 232, 0.96) 100%),
     radial-gradient(circle at 18% 18%, rgba(255, 207, 120, 0.28), transparent 28%),
     radial-gradient(circle at 82% 14%, rgba(201, 111, 43, 0.24), transparent 24%);
   pointer-events: none;
@@ -976,9 +989,7 @@ textarea::placeholder {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background:
-    linear-gradient(180deg, rgba(15, 10, 8, 0.08) 0%, rgba(15, 10, 8, 0.56) 60%, rgba(15, 10, 8, 0.86) 100%),
-    url("../../noite_arcoverde.jpeg") center center / cover no-repeat;
+  background: #24140e;
   box-shadow: 0 28px 70px rgba(44, 25, 15, 0.2);
 }
 
@@ -986,6 +997,7 @@ textarea::placeholder {
   position: absolute;
   inset: 0;
   background:
+    linear-gradient(180deg, rgba(15, 10, 8, 0.08) 0%, rgba(15, 10, 8, 0.56) 60%, rgba(15, 10, 8, 0.86) 100%),
     radial-gradient(circle at 18% 16%, rgba(255, 210, 130, 0.3), transparent 20%),
     radial-gradient(circle at 82% 18%, rgba(201, 111, 43, 0.28), transparent 22%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 30%);

@@ -1,10 +1,12 @@
-const CACHE_NAME = "rotatech-arcoverde-v6";
+const CACHE_NAME = "rotatech-arcoverde-v7";
 
 const ASSETS_TO_CACHE = [
-  "manifest.json?v=1.0.5",
+  "manifest.json?v=1.0.7",
   "logomarca.png",
-  "assets/css/style.css?v=1.0.7",
-  "assets/js/app.js?v=1.0.5",
+  "icon.png",
+  "noite_arcoverde.jpeg",
+  "assets/css/style.css?v=1.0.8",
+  "assets/js/app.js?v=1.0.6",
   "assets/img/logo-rotatech.svg",
   "assets/img/logo-saojoao.svg",
   "assets/img/hero-fogueira.svg"

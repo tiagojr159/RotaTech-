@@ -33,6 +33,7 @@ include __DIR__ . '/includes/header.php';
 ?>
 <section class="auth-wrap">
     <div class="auth-hero">
+        <img src="noite_arcoverde.jpeg" alt="Noite em Arcoverde" class="auth-hero-bg" loading="eager" fetchpriority="high">
         <div class="auth-hero-overlay"></div>
         <div class="flags-top">
             <span class="flag c1"></span><span class="flag c2"></span><span class="flag c3"></span><span class="flag c4"></span><span class="flag c5"></span>

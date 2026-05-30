@@ -411,11 +411,15 @@
   };
 
   const setupPwaInstall = () => {
+    const appBaseUrl = window.APP_BASE_URL || "/rotatech/";
+    const postInstallUrl = window.APP_ABSOLUTE_URL || "https://ki6.com.br/rotatech/";
+
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("service-worker.js").catch(() => {});
+      navigator.serviceWorker.register(`${appBaseUrl}service-worker.js`, {
+        scope: appBaseUrl,
+      }).catch(() => {});
     }
 
-    const postInstallUrl = "https://ki6.com.br/rotatech/";
     let hasRedirectedAfterInstall = false;
     const redirectAfterInstall = () => {
       if (hasRedirectedAfterInstall) return;

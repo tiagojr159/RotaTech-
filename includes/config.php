@@ -18,6 +18,8 @@ define('DATA_PATH', BASE_PATH . DIRECTORY_SEPARATOR . 'data');
 define('UPLOADS_PATH', BASE_PATH . DIRECTORY_SEPARATOR . 'uploads');
 define('ASSETS_PATH', BASE_PATH . DIRECTORY_SEPARATOR . 'assets');
 define('APP_NAME', 'RotaTech Arcoverde');
+define('APP_BASE_URL', '/rotatech/');
+define('APP_ABSOLUTE_URL', 'https://ki6.com.br/rotatech/');
 
 if (!is_dir(DATA_PATH)) {
     mkdir(DATA_PATH, 0775, true);

@@ -1,4 +1,4 @@
-const CACHE_NAME = "rotatech-arcoverde-v2";
+const CACHE_NAME = "rotatech-arcoverde-v3";
 const OFFLINE_URL = "index.php";
 
 const ASSETS_TO_CACHE = [

@@ -280,99 +280,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $albumFotos = readJson('album_fotos.json');
 }
 
-$usuariosAtivos = count($users);
-$fotosAlbumTotal = count($albumFotos);
-$gruposAtivos = count($grupos);
-$convitesPendentes = count(array_filter($convites, fn(array $invite): bool => ($invite['status'] ?? '') === 'pendente'));
-$roteirosAtivos = count(array_filter($roteiros, fn(array $roteiro): bool => !empty($roteiro['itens'] ?? [])));
-$roteirosCompartilhados = 0;
-$favoritosPorEvento = [];
-$usuariosComFavoritos = 0;
-$figurinhasColetadas = 0;
-
-foreach ($users as $userRow) {
-    $favoritosUsuario = $userRow['favoritos'] ?? [];
-    if (!empty($favoritosUsuario)) {
-        $usuariosComFavoritos++;
-    }
-    foreach ($favoritosUsuario as $eventoId) {
-        $eventoId = (int) $eventoId;
-        $favoritosPorEvento[$eventoId] = ($favoritosPorEvento[$eventoId] ?? 0) + 1;
-    }
-    $figurinhasColetadas += count($userRow['figurinhas'] ?? []);
-}
-
-foreach ($roteiros as $roteiro) {
-    foreach (($roteiro['itens'] ?? []) as $item) {
-        if (!empty($item['compartilhado_com_id'])) {
-            $roteirosCompartilhados++;
-        }
-    }
-}
-
-$eventosPorLotacao = [
-    'alta_lotacao' => 0,
-    'movimento_moderado' => 0,
-    'pouco_movimento' => 0,
-];
-$participacaoPorPalco = [];
-$eventosRelatorio = [];
-
-foreach ($programacao as $evento) {
-    $eventoId = (int) ($evento['id'] ?? 0);
-    $palco = (string) ($evento['palco'] ?? 'Palco nao informado');
-    $artista = (string) ($evento['artista'] ?? 'Evento');
-    $lotacao = (string) ($evento['lotacao'] ?? 'movimento_moderado');
-    $favoritos = (int) ($favoritosPorEvento[$eventoId] ?? 0);
-    $matchesRoteiro = 0;
-
-    foreach ($roteiros as $roteiro) {
-        foreach (($roteiro['itens'] ?? []) as $item) {
-            $titulo = mb_strtolower((string) ($item['titulo'] ?? ''));
-            $local = mb_strtolower((string) ($item['local'] ?? ''));
-            if (
-                $titulo !== '' && str_contains($titulo, mb_strtolower($artista))
-                || $local !== '' && str_contains($local, mb_strtolower($palco))
-            ) {
-                $matchesRoteiro++;
-            }
-        }
-    }
-
-    $pesoLotacao = 10;
-    if ($lotacao === 'alta_lotacao') {
-        $pesoLotacao = 22;
-    } elseif ($lotacao === 'movimento_moderado') {
-        $pesoLotacao = 14;
-    } elseif ($lotacao === 'pouco_movimento') {
-        $pesoLotacao = 8;
-    }
-
-    if (isset($eventosPorLotacao[$lotacao])) {
-        $eventosPorLotacao[$lotacao]++;
-    }
-
-    $scoreParticipacao = ($favoritos * 4) + ($matchesRoteiro * 3) + $pesoLotacao;
-    $participacaoPorPalco[$palco] = ($participacaoPorPalco[$palco] ?? 0) + $scoreParticipacao;
-
-    $eventosRelatorio[] = [
-        'artista' => $artista,
-        'palco' => $palco,
-        'data' => (string) ($evento['data'] ?? ''),
-        'horario' => (string) ($evento['horario'] ?? ''),
-        'favoritos' => $favoritos,
-        'roteiros' => $matchesRoteiro,
-        'lotacao' => lotacaoLabel($lotacao),
-        'score' => $scoreParticipacao,
-    ];
-}
-
-usort($eventosRelatorio, fn(array $a, array $b): int => $b['score'] <=> $a['score']);
-arsort($participacaoPorPalco);
-
-$engajamentoMedio = $usuariosAtivos > 0 ? (int) round((($usuariosComFavoritos + $fotosAlbumTotal + $roteirosAtivos) / $usuariosAtivos) * 100) : 0;
-$topPalcos = array_slice($participacaoPorPalco, 0, 3, true);
-$topEventos = array_slice($eventosRelatorio, 0, 5);
+$report = buildAdminReportData($users, $albumFotos, $programacao, $roteiros, $grupos, $convites);
+$usuariosAtivos = $report['usuariosAtivos'];
+$fotosAlbumTotal = $report['fotosAlbumTotal'];
+$gruposAtivos = $report['gruposAtivos'];
+$convitesPendentes = $report['convitesPendentes'];
+$roteirosAtivos = $report['roteirosAtivos'];
+$roteirosCompartilhados = $report['roteirosCompartilhados'];
+$usuariosComFavoritos = $report['usuariosComFavoritos'];
+$figurinhasColetadas = $report['figurinhasColetadas'];
+$eventosPorLotacao = $report['eventosPorLotacao'];
+$eventosRelatorio = $report['eventosRelatorio'];
+$engajamentoMedio = $report['engajamentoMedio'];
+$topPalcos = $report['topPalcos'];
+$topEventos = $report['topEventos'];
+$usuariosComFotos = $report['usuariosComFotos'];
+$usuariosComRoteiro = $report['usuariosComRoteiro'];
+$usuariosEngajados = $report['usuariosEngajados'];
 
 $showTopBar = true;
 $backUrl = 'home.php';

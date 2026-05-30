@@ -1,4 +1,4 @@
-const CACHE_NAME = "rotatech-arcoverde-v7";
+const CACHE_NAME = "rotatech-arcoverde-v8";
 
 const ASSETS_TO_CACHE = [
   "manifest.json?v=1.0.7",
@@ -8,8 +8,7 @@ const ASSETS_TO_CACHE = [
   "assets/css/style.css?v=1.0.8",
   "assets/js/app.js?v=1.0.6",
   "assets/img/logo-rotatech.svg",
-  "assets/img/logo-saojoao.svg",
-  "assets/img/hero-fogueira.svg"
+  "assets/img/logo-saojoao.svg"
 ];
 
 self.addEventListener("install", (event) => {

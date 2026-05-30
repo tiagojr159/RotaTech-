@@ -31,7 +31,7 @@ $rightHtml = '
 include __DIR__ . '/includes/header.php';
 ?>
 <section class="hero-card with-image">
-    <img src="assets/img/hero-fogueira.svg" alt="Fogueira">
+    <img src="noite_arcoverde.jpeg" alt="Noite em Arcoverde">
     <div class="overlay"></div>
     <div class="hero-content">
         <div class="hero-topline">

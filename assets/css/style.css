@@ -1915,7 +1915,7 @@ textarea::placeholder {
   border-radius: 14px;
   background:
     linear-gradient(rgba(244, 238, 228, 0.85), rgba(244, 238, 228, 0.85)),
-    url("../img/hero-fogueira.svg") center/cover;
+    url("../../noite_arcoverde.jpeg") center/cover;
   min-height: 172px;
 }
 

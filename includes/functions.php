@@ -479,3 +479,270 @@ function lotacaoLabel(string $lotacao): string
     return 'Fluxo normal';
 }
 
+function buildAdminReportData(
+    array $users,
+    array $albumFotos,
+    array $programacao,
+    array $roteiros,
+    array $grupos,
+    array $convites
+): array {
+    $usuariosAtivos = count($users);
+    $fotosAlbumTotal = count($albumFotos);
+    $gruposAtivos = count($grupos);
+    $convitesPendentes = count(array_filter($convites, fn(array $invite): bool => ($invite['status'] ?? '') === 'pendente'));
+    $roteirosAtivos = count(array_filter($roteiros, fn(array $roteiro): bool => !empty($roteiro['itens'] ?? [])));
+    $roteirosCompartilhados = 0;
+    $favoritosPorEvento = [];
+    $usuariosComFavoritos = 0;
+    $figurinhasColetadas = 0;
+    $usuariosAdmin = 0;
+    $usuariosComFotos = [];
+    $usuariosComRoteiro = [];
+    $usuariosEngajados = [];
+    $usuariosParticipacao = [];
+
+    foreach ($users as $userRow) {
+        $userId = (int) ($userRow['id'] ?? 0);
+        $favoritosUsuario = $userRow['favoritos'] ?? [];
+        if (!empty($userRow['is_admin']) || isMasterUser($userRow)) {
+            $usuariosAdmin++;
+        }
+        if (!empty($favoritosUsuario)) {
+            $usuariosComFavoritos++;
+            $usuariosEngajados[$userId] = true;
+            $usuariosParticipacao[$userId] = ($usuariosParticipacao[$userId] ?? 0) + (count($favoritosUsuario) * 2);
+        }
+        foreach ($favoritosUsuario as $eventoId) {
+            $eventoId = (int) $eventoId;
+            $favoritosPorEvento[$eventoId] = ($favoritosPorEvento[$eventoId] ?? 0) + 1;
+        }
+        $figurinhasColetadas += count($userRow['figurinhas'] ?? []);
+    }
+
+    foreach ($roteiros as $roteiro) {
+        $ownerId = (int) ($roteiro['user_id'] ?? 0);
+        $itens = $roteiro['itens'] ?? [];
+        if ($ownerId > 0 && !empty($itens)) {
+            $usuariosComRoteiro[$ownerId] = true;
+            $usuariosEngajados[$ownerId] = true;
+            $usuariosParticipacao[$ownerId] = ($usuariosParticipacao[$ownerId] ?? 0) + count($itens);
+        }
+        foreach ($itens as $item) {
+            if (!empty($item['compartilhado_com_id'])) {
+                $roteirosCompartilhados++;
+                $sharedId = (int) $item['compartilhado_com_id'];
+                if ($sharedId > 0) {
+                    $usuariosEngajados[$sharedId] = true;
+                    $usuariosParticipacao[$sharedId] = ($usuariosParticipacao[$sharedId] ?? 0) + 1;
+                }
+            }
+        }
+    }
+
+    foreach ($albumFotos as $foto) {
+        $photoUserId = (int) ($foto['user_id'] ?? 0);
+        if ($photoUserId > 0) {
+            $usuariosComFotos[$photoUserId] = true;
+            $usuariosEngajados[$photoUserId] = true;
+            $usuariosParticipacao[$photoUserId] = ($usuariosParticipacao[$photoUserId] ?? 0) + 3;
+        }
+    }
+
+    $eventosPorLotacao = [
+        'alta_lotacao' => 0,
+        'movimento_moderado' => 0,
+        'pouco_movimento' => 0,
+    ];
+    $participacaoPorPalco = [];
+    $eventosRelatorio = [];
+
+    foreach ($programacao as $evento) {
+        $eventoId = (int) ($evento['id'] ?? 0);
+        $palco = (string) ($evento['palco'] ?? 'Palco nao informado');
+        $artista = (string) ($evento['artista'] ?? 'Evento');
+        $lotacao = (string) ($evento['lotacao'] ?? 'movimento_moderado');
+        $favoritos = (int) ($favoritosPorEvento[$eventoId] ?? 0);
+        $matchesRoteiro = 0;
+
+        foreach ($roteiros as $roteiro) {
+            foreach (($roteiro['itens'] ?? []) as $item) {
+                $titulo = mb_strtolower((string) ($item['titulo'] ?? ''));
+                $local = mb_strtolower((string) ($item['local'] ?? ''));
+                if (
+                    ($titulo !== '' && str_contains($titulo, mb_strtolower($artista)))
+                    || ($local !== '' && str_contains($local, mb_strtolower($palco)))
+                ) {
+                    $matchesRoteiro++;
+                }
+            }
+        }
+
+        $pesoLotacao = 10;
+        if ($lotacao === 'alta_lotacao') {
+            $pesoLotacao = 22;
+        } elseif ($lotacao === 'movimento_moderado') {
+            $pesoLotacao = 14;
+        } elseif ($lotacao === 'pouco_movimento') {
+            $pesoLotacao = 8;
+        }
+
+        if (isset($eventosPorLotacao[$lotacao])) {
+            $eventosPorLotacao[$lotacao]++;
+        }
+
+        $scoreParticipacao = ($favoritos * 4) + ($matchesRoteiro * 3) + $pesoLotacao;
+        $participacaoPorPalco[$palco] = ($participacaoPorPalco[$palco] ?? 0) + $scoreParticipacao;
+
+        $eventosRelatorio[] = [
+            'artista' => $artista,
+            'palco' => $palco,
+            'data' => (string) ($evento['data'] ?? ''),
+            'horario' => (string) ($evento['horario'] ?? ''),
+            'favoritos' => $favoritos,
+            'roteiros' => $matchesRoteiro,
+            'lotacao' => lotacaoLabel($lotacao),
+            'score' => $scoreParticipacao,
+        ];
+    }
+
+    usort($eventosRelatorio, fn(array $a, array $b): int => $b['score'] <=> $a['score']);
+    arsort($participacaoPorPalco);
+
+    $usuariosDetalhados = [];
+    foreach ($users as $userRow) {
+        $userId = (int) ($userRow['id'] ?? 0);
+        $usuariosDetalhados[] = [
+            'nome' => (string) ($userRow['nome'] ?? 'Usuario'),
+            'usuario' => (string) ($userRow['usuario'] ?? ''),
+            'email' => (string) ($userRow['email'] ?? ''),
+            'titulo' => (string) ($userRow['titulo'] ?? ''),
+            'criado_em' => (string) ($userRow['criado_em'] ?? ''),
+            'favoritos' => count($userRow['favoritos'] ?? []),
+            'figurinhas' => count($userRow['figurinhas'] ?? []),
+            'tem_roteiro' => !empty($usuariosComRoteiro[$userId]),
+            'enviou_foto' => !empty($usuariosComFotos[$userId]),
+            'engajamento' => (int) ($usuariosParticipacao[$userId] ?? 0),
+            'is_admin' => !empty($userRow['is_admin']) || isMasterUser($userRow),
+        ];
+    }
+
+    usort($usuariosDetalhados, fn(array $a, array $b): int => $b['engajamento'] <=> $a['engajamento']);
+
+    $engajamentoMedio = $usuariosAtivos > 0 ? (int) round((($usuariosComFavoritos + $fotosAlbumTotal + $roteirosAtivos) / $usuariosAtivos) * 100) : 0;
+
+    return [
+        'usuariosAtivos' => $usuariosAtivos,
+        'usuariosAdmin' => $usuariosAdmin,
+        'fotosAlbumTotal' => $fotosAlbumTotal,
+        'gruposAtivos' => $gruposAtivos,
+        'convitesPendentes' => $convitesPendentes,
+        'roteirosAtivos' => $roteirosAtivos,
+        'roteirosCompartilhados' => $roteirosCompartilhados,
+        'usuariosComFavoritos' => $usuariosComFavoritos,
+        'figurinhasColetadas' => $figurinhasColetadas,
+        'eventosPorLotacao' => $eventosPorLotacao,
+        'participacaoPorPalco' => $participacaoPorPalco,
+        'eventosRelatorio' => $eventosRelatorio,
+        'engajamentoMedio' => $engajamentoMedio,
+        'topPalcos' => array_slice($participacaoPorPalco, 0, 3, true),
+        'topEventos' => array_slice($eventosRelatorio, 0, 5),
+        'usuariosDetalhados' => $usuariosDetalhados,
+        'usuariosComFotos' => count($usuariosComFotos),
+        'usuariosComRoteiro' => count($usuariosComRoteiro),
+        'usuariosEngajados' => count($usuariosEngajados),
+    ];
+}
+
+function pdfEscapeText(string $text): string
+{
+    $converted = @iconv('UTF-8', 'Windows-1252//TRANSLIT//IGNORE', $text);
+    if ($converted === false) {
+        $converted = preg_replace('/[^\x20-\x7E]/', '', $text) ?? $text;
+    }
+
+    return str_replace(
+        ['\\', '(', ')', "\r", "\n"],
+        ['\\\\', '\\(', '\\)', '', ''],
+        $converted
+    );
+}
+
+function outputSimplePdf(string $filename, array $lines): void
+{
+    $pageWidth = 595;
+    $pageHeight = 842;
+    $left = 42;
+    $top = 800;
+    $lineHeight = 14;
+    $maxLinesPerPage = 52;
+    $lineChunks = array_chunk($lines, $maxLinesPerPage);
+
+    if ($lineChunks === []) {
+        $lineChunks = [['Relatorio vazio']];
+    }
+
+    $objects = [];
+    $addObject = static function (string $content) use (&$objects): int {
+        $objects[] = $content;
+        return count($objects);
+    };
+
+    $fontId = $addObject("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>");
+    $pageIds = [];
+
+    foreach ($lineChunks as $chunk) {
+        $content = "BT\n/F1 11 Tf\n";
+        $y = $top;
+        foreach ($chunk as $index => $line) {
+            $fontSize = $index === 0 ? 16 : 11;
+            if ($index === 0) {
+                $content .= "/F1 {$fontSize} Tf\n";
+            } elseif ($index === 1) {
+                $content .= "/F1 11 Tf\n";
+            }
+            $content .= sprintf("1 0 0 1 %d %d Tm (%s) Tj\n", $left, $y, pdfEscapeText($line));
+            $y -= $lineHeight;
+        }
+        $content .= "ET";
+
+        $stream = "<< /Length " . strlen($content) . " >>\nstream\n{$content}\nendstream";
+        $contentId = $addObject($stream);
+        $pageIds[] = $addObject("<< /Type /Page /Parent %%PAGES%% 0 R /MediaBox [0 0 {$pageWidth} {$pageHeight}] /Resources << /Font << /F1 {$fontId} 0 R >> >> /Contents {$contentId} 0 R >>");
+    }
+
+    $kids = implode(' ', array_map(static fn(int $id): string => "{$id} 0 R", $pageIds));
+    $pagesId = $addObject("<< /Type /Pages /Count " . count($pageIds) . " /Kids [ {$kids} ] >>");
+
+    foreach ($pageIds as $pageId) {
+        $objects[$pageId - 1] = str_replace('%%PAGES%%', (string) $pagesId, $objects[$pageId - 1]);
+    }
+
+    $catalogId = $addObject("<< /Type /Catalog /Pages {$pagesId} 0 R >>");
+
+    $pdf = "%PDF-1.4\n";
+    $offsets = [0];
+
+    foreach ($objects as $index => $object) {
+        $offsets[] = strlen($pdf);
+        $objNumber = $index + 1;
+        $pdf .= "{$objNumber} 0 obj\n{$object}\nendobj\n";
+    }
+
+    $xrefPosition = strlen($pdf);
+    $pdf .= "xref\n0 " . (count($objects) + 1) . "\n";
+    $pdf .= "0000000000 65535 f \n";
+
+    for ($i = 1; $i <= count($objects); $i++) {
+        $pdf .= sprintf("%010d 00000 n \n", $offsets[$i]);
+    }
+
+    $pdf .= "trailer\n<< /Size " . (count($objects) + 1) . " /Root {$catalogId} 0 R >>\nstartxref\n{$xrefPosition}\n%%EOF";
+
+    header('Content-Type: application/pdf');
+    header('Content-Disposition: attachment; filename="' . basename($filename) . '"');
+    header('Content-Length: ' . strlen($pdf));
+    echo $pdf;
+    exit;
+}
+

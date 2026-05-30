@@ -1313,8 +1313,11 @@ textarea::placeholder {
 }
 
 .album-photo-modal-content {
-  width: min(94vw, 460px);
+  width: min(96vw, 760px);
+  max-height: 92dvh;
   padding: 14px;
+  display: flex;
+  flex-direction: column;
 }
 
 .album-photo-modal-head {
@@ -1332,10 +1335,24 @@ textarea::placeholder {
 
 #album-photo-preview {
   width: 100%;
-  max-height: 72dvh;
+  flex: 1;
+  min-height: 58dvh;
+  max-height: 78dvh;
   object-fit: contain;
   border-radius: 18px;
   background: color-mix(in srgb, var(--card-soft) 84%, black 16%);
+}
+
+@media (max-width: 520px) {
+  .album-photo-modal-content {
+    width: min(96vw, 96vw);
+    padding: 12px;
+  }
+
+  #album-photo-preview {
+    min-height: 52dvh;
+    max-height: 72dvh;
+  }
 }
 
 .date-line {

@@ -4,23 +4,24 @@ require_once __DIR__ . '/includes/config.php';
 require_once __DIR__ . '/includes/functions.php';
 requireAdmin();
 
-$current = currentUser();
-$isMaster = isMasterUser($current);
 $message = '';
 $error = '';
+$activeAdminTab = sanitize($_POST['admin_tab'] ?? $_GET['tab'] ?? 'hospedagem');
+if (!in_array($activeAdminTab, ['hospedagem', 'restaurantes', 'eventos'], true)) {
+    $activeAdminTab = 'hospedagem';
+}
 
-$users = readJson('users.json');
-$restaurantes = readJson('restaurantes.json');
-$figurinhas = readJson('figurinhas.json');
-$roteiros = readJson('roteiros.json');
 $hospedagens = readJson('hospedagens.json');
+$restaurantes = readJson('restaurantes.json');
 $programacao = readJson('programacao.json');
 
 $nextId = static function (array $rows): int {
     $max = 0;
     foreach ($rows as $row) {
         $id = (int) ($row['id'] ?? 0);
-        if ($id > $max) $max = $id;
+        if ($id > $max) {
+            $max = $id;
+        }
     }
     return $max + 1;
 };
@@ -28,209 +29,147 @@ $nextId = static function (array $rows): int {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = sanitize($_POST['action'] ?? '');
 
-    if ($action === 'create_user') {
-        $nome = sanitize($_POST['nome'] ?? '');
-        $usuario = sanitize($_POST['usuario'] ?? '');
-        $email = sanitize($_POST['email'] ?? '');
-        $senha = (string) ($_POST['senha'] ?? '');
-        $setAdmin = $isMaster && !empty($_POST['is_admin']);
-
-        if ($nome === '' || $usuario === '' || $email === '' || $senha === '') {
-            $error = 'Preencha todos os dados do usuario.';
-        } else {
-            $exists = false;
-            foreach ($users as $u) {
-                if (mb_strtolower((string) $u['email']) === mb_strtolower($email) || mb_strtolower((string) $u['usuario']) === mb_strtolower($usuario)) {
-                    $exists = true;
-                    break;
-                }
-            }
-            if ($exists) {
-                $error = 'Email ou usuario ja cadastrado.';
-            } else {
-                $users[] = [
-                    'id' => generateId(),
-                    'nome' => $nome,
-                    'usuario' => $usuario,
-                    'email' => $email,
-                    'senha_hash' => password_hash($senha, PASSWORD_DEFAULT),
-                    'avatar' => 'assets/img/avatar-default.svg',
-                    'nivel' => 1,
-                    'titulo' => 'NOVO USUARIO',
-                    'pontos' => 0,
-                    'criado_em' => date('Y-m-d'),
-                    'favoritos' => [],
-                    'figurinhas' => [1],
-                    'is_admin' => $setAdmin,
-                ];
-                writeJson('users.json', $users);
-                $message = 'Usuario cadastrado com sucesso.';
-            }
-        }
-    }
-
-    if ($action === 'set_admin' && $isMaster) {
-        $targetId = (int) ($_POST['user_id'] ?? 0);
-        foreach ($users as &$u) {
-            if ((int) ($u['id'] ?? 0) === $targetId) {
-                if (mb_strtolower((string) ($u['email'] ?? '')) !== mb_strtolower(MASTER_USER_EMAIL)) {
-                    $u['is_admin'] = true;
-                }
-                break;
-            }
-        }
-        unset($u);
-        writeJson('users.json', $users);
-        $message = 'Usuario promovido para admin.';
-    }
-
-    if ($action === 'add_restaurante') {
-        $nome = sanitize($_POST['nome'] ?? '');
-        $categoria = sanitize($_POST['categoria'] ?? '');
-        $distancia = sanitize($_POST['distancia'] ?? '');
-        $avaliacao = (float) ($_POST['avaliacao'] ?? 4.5);
-        $faixa = sanitize($_POST['faixa_preco'] ?? '$$');
-        $aberto = sanitize($_POST['aberto_ate'] ?? '23:00');
-        $prato = sanitize($_POST['prato_destaque'] ?? '');
-        $preco = sanitize($_POST['preco_prato'] ?? '');
-        $descricao = sanitize($_POST['descricao'] ?? '');
-        if ($nome === '' || $categoria === '') {
-            $error = 'Informe nome e categoria do restaurante.';
-        } else {
-            $restaurantes[] = [
-                'id' => $nextId($restaurantes),
-                'nome' => $nome,
-                'categoria' => $categoria,
-                'distancia' => $distancia !== '' ? $distancia : '0.0km',
-                'avaliacao' => $avaliacao,
-                'faixa_preco' => $faixa,
-                'aberto_ate' => $aberto,
-                'imagem' => 'assets/img/rest-casarao.svg',
-                'prato_destaque' => $prato !== '' ? $prato : 'Prato da casa',
-                'preco_prato' => $preco !== '' ? $preco : 'R$ 0,00',
-                'descricao' => $descricao !== '' ? $descricao : 'Sem descricao.',
-                'lotacao' => 'movimento_moderado',
-            ];
-            writeJson('restaurantes.json', $restaurantes);
-            $message = 'Restaurante cadastrado.';
-        }
-    }
-
-    if ($action === 'add_hospedagem') {
+    if ($action === 'save_hospedagem') {
+        $id = (int) ($_POST['id'] ?? 0);
         $nome = sanitize($_POST['nome'] ?? '');
         $categoria = sanitize($_POST['categoria'] ?? 'hotel');
         $endereco = sanitize($_POST['endereco'] ?? '');
         $cidade = sanitize($_POST['cidade'] ?? 'Arcoverde, Pernambuco');
-        $lat = (float) ($_POST['latitude'] ?? 0);
-        $lng = (float) ($_POST['longitude'] ?? 0);
-        $imagem = uploadImage('foto_hospedagem');
+        $latitude = (float) ($_POST['latitude'] ?? 0);
+        $longitude = (float) ($_POST['longitude'] ?? 0);
+        $currentImage = sanitize($_POST['imagem_atual'] ?? '');
+        $imagem = uploadImage('foto_hospedagem') ?? ($currentImage !== '' ? $currentImage : null);
+
         if ($nome === '' || $endereco === '') {
             $error = 'Informe nome e endereco da hospedagem.';
         } else {
-            $hospedagens[] = [
-                'id' => $nextId($hospedagens),
+            $payload = [
                 'nome' => $nome,
                 'categoria' => $categoria === 'pousada' ? 'pousada' : 'hotel',
                 'endereco' => $endereco,
                 'cidade' => $cidade,
-                'latitude' => $lat,
-                'longitude' => $lng,
+                'latitude' => $latitude,
+                'longitude' => $longitude,
                 'imagem' => $imagem,
             ];
+
+            $updated = false;
+            foreach ($hospedagens as &$item) {
+                if ((int) ($item['id'] ?? 0) === $id && $id > 0) {
+                    $item = array_merge($item, $payload);
+                    $updated = true;
+                    break;
+                }
+            }
+            unset($item);
+
+            if (!$updated) {
+                $payload['id'] = $nextId($hospedagens);
+                $hospedagens[] = $payload;
+            }
+
             writeJson('hospedagens.json', $hospedagens);
-            $message = 'Hospedagem cadastrada.';
+            $message = $updated ? 'Hospedagem atualizada.' : 'Hospedagem cadastrada.';
         }
     }
 
-    if ($action === 'add_evento') {
+    if ($action === 'save_restaurante') {
+        $id = (int) ($_POST['id'] ?? 0);
+        $nome = sanitize($_POST['nome'] ?? '');
+        $categoria = sanitize($_POST['categoria'] ?? '');
+        $distancia = sanitize($_POST['distancia'] ?? '0.0km');
+        $avaliacao = (float) ($_POST['avaliacao'] ?? 4.5);
+        $faixaPreco = sanitize($_POST['faixa_preco'] ?? '$$');
+        $abertoAte = sanitize($_POST['aberto_ate'] ?? '23:00');
+        $pratoDestaque = sanitize($_POST['prato_destaque'] ?? 'Prato da casa');
+        $precoPrato = sanitize($_POST['preco_prato'] ?? 'R$ 0,00');
+        $descricao = sanitize($_POST['descricao'] ?? 'Sem descricao.');
+
+        if ($nome === '' || $categoria === '') {
+            $error = 'Informe nome e categoria do restaurante.';
+        } else {
+            $payload = [
+                'nome' => $nome,
+                'categoria' => $categoria,
+                'distancia' => $distancia,
+                'avaliacao' => $avaliacao,
+                'faixa_preco' => $faixaPreco,
+                'aberto_ate' => $abertoAte,
+                'imagem' => 'assets/img/rest-casarao.svg',
+                'prato_destaque' => $pratoDestaque,
+                'preco_prato' => $precoPrato,
+                'descricao' => $descricao,
+                'lotacao' => 'movimento_moderado',
+            ];
+
+            $updated = false;
+            foreach ($restaurantes as &$item) {
+                if ((int) ($item['id'] ?? 0) === $id && $id > 0) {
+                    $item = array_merge($item, $payload);
+                    $updated = true;
+                    break;
+                }
+            }
+            unset($item);
+
+            if (!$updated) {
+                $payload['id'] = $nextId($restaurantes);
+                $restaurantes[] = $payload;
+            }
+
+            writeJson('restaurantes.json', $restaurantes);
+            $message = $updated ? 'Restaurante atualizado.' : 'Restaurante cadastrado.';
+        }
+    }
+
+    if ($action === 'save_evento') {
+        $id = (int) ($_POST['id'] ?? 0);
         $artista = sanitize($_POST['artista'] ?? '');
         $palco = sanitize($_POST['palco'] ?? '');
         $data = sanitize($_POST['data'] ?? '');
         $horario = sanitize($_POST['horario'] ?? '');
-        $categoria = sanitize($_POST['categoria'] ?? '');
-        $descricao = sanitize($_POST['descricao'] ?? '');
+        $categoria = sanitize($_POST['categoria'] ?? 'Show');
+        $descricao = sanitize($_POST['descricao'] ?? 'Programacao cadastrada pelo admin.');
+        $status = sanitize($_POST['status'] ?? 'em_breve');
+
         if ($artista === '' || $palco === '' || $data === '' || $horario === '') {
             $error = 'Preencha artista, palco, data e horario.';
         } else {
-            $programacao[] = [
-                'id' => $nextId($programacao),
+            $payload = [
                 'artista' => $artista,
                 'palco' => $palco,
                 'data' => $data,
                 'horario' => $horario,
-                'status' => 'em_breve',
+                'status' => in_array($status, ['ao_vivo', 'proxima_atracao', 'finalizado', 'em_breve'], true) ? $status : 'em_breve',
                 'imagem' => 'assets/img/atracao-alceu.svg',
-                'categoria' => $categoria !== '' ? $categoria : 'Show',
-                'descricao' => $descricao !== '' ? $descricao : 'Programacao cadastrada pelo admin.',
+                'categoria' => $categoria,
+                'descricao' => $descricao,
                 'lotacao' => 'movimento_moderado',
             ];
-            writeJson('programacao.json', $programacao);
-            $message = 'Evento cadastrado na programacao.';
-        }
-    }
 
-    if ($action === 'add_album') {
-        $titulo = sanitize($_POST['titulo'] ?? '');
-        $descricao = sanitize($_POST['descricao'] ?? '');
-        $categoria = sanitize($_POST['categoria'] ?? 'conquista');
-        if ($titulo === '') {
-            $error = 'Informe o titulo do item do album.';
-        } else {
-            $figurinhas[] = [
-                'id' => $nextId($figurinhas),
-                'titulo' => $titulo,
-                'descricao' => $descricao !== '' ? $descricao : 'Item de album adicionado pelo admin.',
-                'imagem' => 'assets/img/sticker-vivi.svg',
-                'categoria' => $categoria,
-                'desbloqueada' => false,
-                'progresso' => 0,
-            ];
-            writeJson('figurinhas.json', $figurinhas);
-            $message = 'Item do album cadastrado.';
-        }
-    }
-
-    if ($action === 'add_roteiro') {
-        $userId = (int) ($_POST['user_id'] ?? 0);
-        $horario = sanitize($_POST['horario'] ?? '');
-        $titulo = sanitize($_POST['titulo'] ?? '');
-        $local = sanitize($_POST['local'] ?? '');
-        $tipo = sanitize($_POST['tipo'] ?? 'show');
-        if ($userId <= 0 || $horario === '' || $titulo === '' || $local === '') {
-            $error = 'Preencha usuario, horario, titulo e local do roteiro.';
-        } else {
-            $targetIndex = null;
-            foreach ($roteiros as $idx => $r) {
-                if (($r['tipo'] ?? '') === 'pessoal' && (int) ($r['user_id'] ?? 0) === $userId) {
-                    $targetIndex = $idx;
+            $updated = false;
+            foreach ($programacao as &$item) {
+                if ((int) ($item['id'] ?? 0) === $id && $id > 0) {
+                    $item = array_merge($item, $payload);
+                    $updated = true;
                     break;
                 }
             }
-            if ($targetIndex === null) {
-                $roteiros[] = [
-                    'id' => generateId(),
-                    'user_id' => $userId,
-                    'tipo' => 'pessoal',
-                    'grupo_id' => null,
-                    'itens' => [],
-                ];
-                $targetIndex = array_key_last($roteiros);
+            unset($item);
+
+            if (!$updated) {
+                $payload['id'] = $nextId($programacao);
+                $programacao[] = $payload;
             }
-            $roteiros[$targetIndex]['itens'][] = [
-                'id' => generateId(),
-                'horario' => $horario,
-                'titulo' => $titulo,
-                'local' => $local,
-                'tipo' => $tipo,
-                'sugerido_por' => 'Admin',
-                'status' => 'pendente',
-            ];
-            writeJson('roteiros.json', $roteiros);
-            $message = 'Roteiro cadastrado para o usuario.';
+
+            writeJson('programacao.json', $programacao);
+            $message = $updated ? 'Evento atualizado.' : 'Evento cadastrado.';
         }
     }
 
-    $users = readJson('users.json');
+    $hospedagens = readJson('hospedagens.json');
+    $restaurantes = readJson('restaurantes.json');
+    $programacao = readJson('programacao.json');
 }
 
 $showTopBar = true;
@@ -240,128 +179,288 @@ $pageEyebrow = 'painel';
 $contentClass = 'admin-content';
 include __DIR__ . '/includes/header.php';
 ?>
-<section class="auth-form-page">
-    <article class="card card-soft">
+<section class="auth-form-page admin-page" data-admin-panel data-admin-active-tab="<?= sanitize($activeAdminTab); ?>">
+    <article class="card card-soft admin-intro">
         <h3>Painel Administrativo</h3>
-        <p>Gerencie usuarios e conteudos do app em um unico lugar.</p>
+        <p>Escolha a categoria, veja o que ja foi cadastrado e abra o cadastro ou a edicao quando precisar.</p>
         <?php if ($message): ?><p class="alert alert-success"><?= sanitize($message); ?></p><?php endif; ?>
         <?php if ($error): ?><p class="alert alert-danger"><?= sanitize($error); ?></p><?php endif; ?>
     </article>
 
-    <nav class="admin-menu card card-soft">
-        <a href="#admin-usuarios" class="admin-menu-item"><i class="fa-solid fa-users"></i><span>Usuarios</span></a>
-        <a href="#admin-restaurantes" class="admin-menu-item"><i class="fa-solid fa-utensils"></i><span>Restaurantes</span></a>
-        <a href="#admin-hospedagem" class="admin-menu-item"><i class="fa-solid fa-bed"></i><span>Hospedagem</span></a>
-        <a href="#admin-eventos" class="admin-menu-item"><i class="fa-solid fa-calendar-days"></i><span>Eventos</span></a>
-        <a href="#admin-album" class="admin-menu-item"><i class="fa-regular fa-images"></i><span>Album</span></a>
-        <a href="#admin-roteiro" class="admin-menu-item"><i class="fa-regular fa-map"></i><span>Roteiro</span></a>
+    <nav class="admin-tab-menu">
+        <button type="button" class="admin-tab-btn" data-admin-tab-button="hospedagem"><i class="fa-solid fa-bed"></i><span>Hoteis e pousadas</span></button>
+        <button type="button" class="admin-tab-btn" data-admin-tab-button="restaurantes"><i class="fa-solid fa-utensils"></i><span>Restaurantes</span></button>
+        <button type="button" class="admin-tab-btn" data-admin-tab-button="eventos"><i class="fa-solid fa-calendar-days"></i><span>Eventos</span></button>
     </nav>
 
-    <form class="card stacked-form" method="post" id="admin-usuarios">
-        <h4>Cadastrar Usuario</h4>
-        <input type="hidden" name="action" value="create_user">
-        <label>Nome</label>
-        <input type="text" name="nome" required>
-        <label>Usuario</label>
-        <input type="text" name="usuario" required>
-        <label>Email</label>
-        <input type="email" name="email" required>
-        <label>Senha</label>
-        <input type="password" name="senha" required minlength="6">
-        <?php if ($isMaster): ?>
-            <label><input type="checkbox" name="is_admin" value="1"> Criar como admin</label>
-        <?php endif; ?>
-        <button class="btn btn-primary btn-xl" type="submit">Salvar Usuario</button>
-    </form>
-
-    <?php if ($isMaster): ?>
-        <form class="card stacked-form" method="post">
-            <h4>Promover Usuario para Admin</h4>
-            <input type="hidden" name="action" value="set_admin">
-            <label>Usuario</label>
-            <select name="user_id" required>
-                <?php foreach ($users as $u): ?>
-                    <option value="<?= (int) $u['id']; ?>"><?= sanitize($u['nome']); ?> (<?= sanitize($u['email']); ?>)</option>
-                <?php endforeach; ?>
-            </select>
-            <button class="btn btn-primary btn-xl" type="submit">Tornar Admin</button>
-        </form>
-    <?php endif; ?>
-
-    <form class="card stacked-form" method="post" id="admin-restaurantes">
-        <h4>Cadastrar Restaurante</h4>
-        <input type="hidden" name="action" value="add_restaurante">
-        <label>Nome</label><input type="text" name="nome" required>
-        <label>Categoria</label><input type="text" name="categoria" required>
-        <label>Distancia</label><input type="text" name="distancia" placeholder="1.2km">
-        <label>Avaliacao</label><input type="number" name="avaliacao" step="0.1" min="0" max="5" value="4.5">
-        <label>Faixa de preco</label><input type="text" name="faixa_preco" value="$$">
-        <label>Aberto ate</label><input type="time" name="aberto_ate" value="23:00">
-        <label>Prato destaque</label><input type="text" name="prato_destaque">
-        <label>Preco do prato</label><input type="text" name="preco_prato" placeholder="R$ 35,00">
-        <label>Descricao</label><textarea name="descricao" rows="2"></textarea>
-        <button class="btn btn-primary btn-xl" type="submit">Salvar Restaurante</button>
-    </form>
-
-    <form class="card stacked-form" method="post" enctype="multipart/form-data" id="admin-hospedagem">
-        <h4>Cadastrar Hospedagem</h4>
-        <input type="hidden" name="action" value="add_hospedagem">
-        <label>Nome</label><input type="text" name="nome" required>
-        <label>Categoria</label>
-        <select name="categoria">
-            <option value="hotel">Hotel</option>
-            <option value="pousada">Pousada</option>
-        </select>
-        <label>Endereco</label><input type="text" name="endereco" required>
-        <label>Cidade</label><input type="text" name="cidade" value="Arcoverde, Pernambuco">
-        <label>Latitude</label><input type="number" step="0.000001" name="latitude">
-        <label>Longitude</label><input type="number" step="0.000001" name="longitude">
-        <label>Foto da hospedagem</label><input type="file" name="foto_hospedagem" accept=".jpg,.jpeg,.png,.webp">
-        <button class="btn btn-primary btn-xl" type="submit">Salvar Hospedagem</button>
-    </form>
-
-    <form class="card stacked-form" method="post" id="admin-eventos">
-        <h4>Cadastrar Evento</h4>
-        <input type="hidden" name="action" value="add_evento">
-        <label>Artista / Evento</label><input type="text" name="artista" required>
-        <label>Palco</label><input type="text" name="palco" required>
-        <label>Data</label><input type="date" name="data" required>
-        <label>Horario</label><input type="time" name="horario" required>
-        <label>Categoria</label><input type="text" name="categoria" placeholder="Show, Danca, Instrumental">
-        <label>Descricao</label><textarea name="descricao" rows="2"></textarea>
-        <button class="btn btn-primary btn-xl" type="submit">Salvar Evento</button>
-    </form>
-
-    <form class="card stacked-form" method="post" id="admin-album">
-        <h4>Cadastrar Item de Album</h4>
-        <input type="hidden" name="action" value="add_album">
-        <label>Titulo</label><input type="text" name="titulo" required>
-        <label>Categoria</label><input type="text" name="categoria" value="conquista">
-        <label>Descricao</label><textarea name="descricao" rows="2"></textarea>
-        <button class="btn btn-primary btn-xl" type="submit">Salvar Item</button>
-    </form>
-
-    <form class="card stacked-form" method="post" id="admin-roteiro">
-        <h4>Cadastrar Roteiro</h4>
-        <input type="hidden" name="action" value="add_roteiro">
-        <label>Usuario</label>
-        <select name="user_id" required>
-            <?php foreach ($users as $u): ?>
-                <option value="<?= (int) $u['id']; ?>"><?= sanitize($u['nome']); ?> (<?= sanitize($u['email']); ?>)</option>
+    <section class="admin-section" data-admin-tab-panel="hospedagem">
+        <div class="section-head admin-section-head">
+            <h3>Hoteis e Pousadas</h3>
+            <button type="button" class="btn btn-primary" data-open-modal="modal-hospedagem-create">Novo cadastro</button>
+        </div>
+        <div class="stack-list admin-list">
+            <?php foreach ($hospedagens as $item): ?>
+                <article class="card admin-item">
+                    <div class="admin-item-media">
+                        <?php if (!empty($item['imagem'])): ?>
+                            <img src="<?= sanitize((string) $item['imagem']); ?>" alt="<?= sanitize((string) $item['nome']); ?>" class="admin-thumb">
+                        <?php else: ?>
+                            <span class="point-icon"><i class="fa-solid fa-bed"></i></span>
+                        <?php endif; ?>
+                    </div>
+                    <div class="admin-item-copy">
+                        <h4><?= sanitize((string) $item['nome']); ?></h4>
+                        <p><?= sanitize(ucfirst((string) $item['categoria'])); ?> - <?= sanitize((string) $item['endereco']); ?></p>
+                        <small><?= sanitize((string) ($item['cidade'] ?? 'Arcoverde, Pernambuco')); ?></small>
+                    </div>
+                    <div class="admin-actions">
+                        <button
+                            type="button"
+                            class="icon-btn soft"
+                            data-open-modal="modal-hospedagem-edit"
+                            data-edit-hospedagem
+                            data-id="<?= (int) $item['id']; ?>"
+                            data-nome="<?= sanitize((string) $item['nome']); ?>"
+                            data-categoria="<?= sanitize((string) $item['categoria']); ?>"
+                            data-endereco="<?= sanitize((string) $item['endereco']); ?>"
+                            data-cidade="<?= sanitize((string) ($item['cidade'] ?? 'Arcoverde, Pernambuco')); ?>"
+                            data-latitude="<?= sanitize((string) ($item['latitude'] ?? 0)); ?>"
+                            data-longitude="<?= sanitize((string) ($item['longitude'] ?? 0)); ?>"
+                            data-imagem="<?= sanitize((string) ($item['imagem'] ?? '')); ?>"
+                        >
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                    </div>
+                </article>
             <?php endforeach; ?>
-        </select>
-        <label>Horario</label><input type="time" name="horario" required>
-        <label>Titulo</label><input type="text" name="titulo" required>
-        <label>Local</label><input type="text" name="local" required>
-        <label>Tipo</label>
-        <select name="tipo">
-            <option value="show">Show</option>
-            <option value="gastronomia">Gastronomia</option>
-            <option value="ponto">Ponto turistico</option>
-        </select>
-        <button class="btn btn-primary btn-xl" type="submit">Salvar Roteiro</button>
-    </form>
+        </div>
+    </section>
+
+    <section class="admin-section hidden" data-admin-tab-panel="restaurantes">
+        <div class="section-head admin-section-head">
+            <h3>Restaurantes</h3>
+            <button type="button" class="btn btn-primary" data-open-modal="modal-restaurante-create">Novo cadastro</button>
+        </div>
+        <div class="stack-list admin-list">
+            <?php foreach ($restaurantes as $item): ?>
+                <article class="card admin-item">
+                    <div class="admin-item-media">
+                        <span class="point-icon"><i class="fa-solid fa-utensils"></i></span>
+                    </div>
+                    <div class="admin-item-copy">
+                        <h4><?= sanitize((string) $item['nome']); ?></h4>
+                        <p><?= sanitize((string) $item['categoria']); ?> - <?= sanitize((string) $item['distancia']); ?></p>
+                        <small><?= sanitize((string) $item['aberto_ate']); ?> - <?= sanitize((string) $item['faixa_preco']); ?></small>
+                    </div>
+                    <div class="admin-actions">
+                        <button
+                            type="button"
+                            class="icon-btn soft"
+                            data-open-modal="modal-restaurante-edit"
+                            data-edit-restaurante
+                            data-id="<?= (int) $item['id']; ?>"
+                            data-nome="<?= sanitize((string) $item['nome']); ?>"
+                            data-categoria="<?= sanitize((string) $item['categoria']); ?>"
+                            data-distancia="<?= sanitize((string) $item['distancia']); ?>"
+                            data-avaliacao="<?= sanitize((string) $item['avaliacao']); ?>"
+                            data-faixa="<?= sanitize((string) $item['faixa_preco']); ?>"
+                            data-aberto="<?= sanitize((string) $item['aberto_ate']); ?>"
+                            data-prato="<?= sanitize((string) $item['prato_destaque']); ?>"
+                            data-preco="<?= sanitize((string) $item['preco_prato']); ?>"
+                            data-descricao="<?= sanitize((string) $item['descricao']); ?>"
+                        >
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                    </div>
+                </article>
+            <?php endforeach; ?>
+        </div>
+    </section>
+
+    <section class="admin-section hidden" data-admin-tab-panel="eventos">
+        <div class="section-head admin-section-head">
+            <h3>Eventos</h3>
+            <button type="button" class="btn btn-primary" data-open-modal="modal-evento-create">Novo cadastro</button>
+        </div>
+        <div class="stack-list admin-list">
+            <?php foreach ($programacao as $item): ?>
+                <article class="card admin-item">
+                    <div class="admin-item-media">
+                        <span class="point-icon"><i class="fa-solid fa-calendar-days"></i></span>
+                    </div>
+                    <div class="admin-item-copy">
+                        <h4><?= sanitize((string) $item['artista']); ?></h4>
+                        <p><?= sanitize((string) $item['palco']); ?> - <?= sanitize((string) $item['horario']); ?></p>
+                        <small><?= sanitize((string) $item['data']); ?> - <?= sanitize((string) $item['status']); ?></small>
+                    </div>
+                    <div class="admin-actions">
+                        <button
+                            type="button"
+                            class="icon-btn soft"
+                            data-open-modal="modal-evento-edit"
+                            data-edit-evento
+                            data-id="<?= (int) $item['id']; ?>"
+                            data-artista="<?= sanitize((string) $item['artista']); ?>"
+                            data-palco="<?= sanitize((string) $item['palco']); ?>"
+                            data-data="<?= sanitize((string) $item['data']); ?>"
+                            data-horario="<?= sanitize((string) $item['horario']); ?>"
+                            data-categoria="<?= sanitize((string) $item['categoria']); ?>"
+                            data-descricao="<?= sanitize((string) $item['descricao']); ?>"
+                            data-status="<?= sanitize((string) $item['status']); ?>"
+                        >
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                    </div>
+                </article>
+            <?php endforeach; ?>
+        </div>
+    </section>
 </section>
+
+<div class="modal hidden" id="modal-hospedagem-create">
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-content">
+        <h3>Novo Hotel ou Pousada</h3>
+        <form class="stacked-form" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="action" value="save_hospedagem">
+            <input type="hidden" name="admin_tab" value="hospedagem">
+            <input type="hidden" name="id" value="0">
+            <label>Nome</label><input type="text" name="nome" required>
+            <label>Categoria</label>
+            <select name="categoria">
+                <option value="hotel">Hotel</option>
+                <option value="pousada">Pousada</option>
+            </select>
+            <label>Endereco</label><input type="text" name="endereco" required>
+            <label>Cidade</label><input type="text" name="cidade" value="Arcoverde, Pernambuco">
+            <label>Latitude</label><input type="number" step="0.000001" name="latitude">
+            <label>Longitude</label><input type="number" step="0.000001" name="longitude">
+            <label>Foto</label><input type="file" name="foto_hospedagem" accept=".jpg,.jpeg,.png,.webp">
+            <button class="btn btn-primary btn-xl" type="submit">Salvar hospedagem</button>
+        </form>
+    </div>
+</div>
+
+<div class="modal hidden" id="modal-hospedagem-edit">
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-content">
+        <h3>Editar Hotel ou Pousada</h3>
+        <form class="stacked-form" method="post" enctype="multipart/form-data" id="form-edit-hospedagem">
+            <input type="hidden" name="action" value="save_hospedagem">
+            <input type="hidden" name="admin_tab" value="hospedagem">
+            <input type="hidden" name="id" value="0">
+            <input type="hidden" name="imagem_atual" value="">
+            <label>Nome</label><input type="text" name="nome" required>
+            <label>Categoria</label>
+            <select name="categoria">
+                <option value="hotel">Hotel</option>
+                <option value="pousada">Pousada</option>
+            </select>
+            <label>Endereco</label><input type="text" name="endereco" required>
+            <label>Cidade</label><input type="text" name="cidade" value="Arcoverde, Pernambuco">
+            <label>Latitude</label><input type="number" step="0.000001" name="latitude">
+            <label>Longitude</label><input type="number" step="0.000001" name="longitude">
+            <label>Foto</label><input type="file" name="foto_hospedagem" accept=".jpg,.jpeg,.png,.webp">
+            <button class="btn btn-primary btn-xl" type="submit">Atualizar hospedagem</button>
+        </form>
+    </div>
+</div>
+
+<div class="modal hidden" id="modal-restaurante-create">
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-content">
+        <h3>Novo Restaurante</h3>
+        <form class="stacked-form" method="post">
+            <input type="hidden" name="action" value="save_restaurante">
+            <input type="hidden" name="admin_tab" value="restaurantes">
+            <input type="hidden" name="id" value="0">
+            <label>Nome</label><input type="text" name="nome" required>
+            <label>Categoria</label><input type="text" name="categoria" required>
+            <label>Distancia</label><input type="text" name="distancia" value="0.0km">
+            <label>Avaliacao</label><input type="number" name="avaliacao" step="0.1" min="0" max="5" value="4.5">
+            <label>Faixa de preco</label><input type="text" name="faixa_preco" value="$$">
+            <label>Aberto ate</label><input type="time" name="aberto_ate" value="23:00">
+            <label>Prato destaque</label><input type="text" name="prato_destaque">
+            <label>Preco do prato</label><input type="text" name="preco_prato" placeholder="R$ 0,00">
+            <label>Descricao</label><textarea name="descricao" rows="2"></textarea>
+            <button class="btn btn-primary btn-xl" type="submit">Salvar restaurante</button>
+        </form>
+    </div>
+</div>
+
+<div class="modal hidden" id="modal-restaurante-edit">
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-content">
+        <h3>Editar Restaurante</h3>
+        <form class="stacked-form" method="post" id="form-edit-restaurante">
+            <input type="hidden" name="action" value="save_restaurante">
+            <input type="hidden" name="admin_tab" value="restaurantes">
+            <input type="hidden" name="id" value="0">
+            <label>Nome</label><input type="text" name="nome" required>
+            <label>Categoria</label><input type="text" name="categoria" required>
+            <label>Distancia</label><input type="text" name="distancia" value="0.0km">
+            <label>Avaliacao</label><input type="number" name="avaliacao" step="0.1" min="0" max="5" value="4.5">
+            <label>Faixa de preco</label><input type="text" name="faixa_preco" value="$$">
+            <label>Aberto ate</label><input type="time" name="aberto_ate" value="23:00">
+            <label>Prato destaque</label><input type="text" name="prato_destaque">
+            <label>Preco do prato</label><input type="text" name="preco_prato" placeholder="R$ 0,00">
+            <label>Descricao</label><textarea name="descricao" rows="2"></textarea>
+            <button class="btn btn-primary btn-xl" type="submit">Atualizar restaurante</button>
+        </form>
+    </div>
+</div>
+
+<div class="modal hidden" id="modal-evento-create">
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-content">
+        <h3>Novo Evento</h3>
+        <form class="stacked-form" method="post">
+            <input type="hidden" name="action" value="save_evento">
+            <input type="hidden" name="admin_tab" value="eventos">
+            <input type="hidden" name="id" value="0">
+            <label>Artista / Evento</label><input type="text" name="artista" required>
+            <label>Palco</label><input type="text" name="palco" required>
+            <label>Data</label><input type="date" name="data" required>
+            <label>Horario</label><input type="time" name="horario" required>
+            <label>Categoria</label><input type="text" name="categoria" value="Show">
+            <label>Status</label>
+            <select name="status">
+                <option value="em_breve">Em breve</option>
+                <option value="proxima_atracao">Proxima atracao</option>
+                <option value="ao_vivo">Ao vivo</option>
+                <option value="finalizado">Finalizado</option>
+            </select>
+            <label>Descricao</label><textarea name="descricao" rows="2"></textarea>
+            <button class="btn btn-primary btn-xl" type="submit">Salvar evento</button>
+        </form>
+    </div>
+</div>
+
+<div class="modal hidden" id="modal-evento-edit">
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-content">
+        <h3>Editar Evento</h3>
+        <form class="stacked-form" method="post" id="form-edit-evento">
+            <input type="hidden" name="action" value="save_evento">
+            <input type="hidden" name="admin_tab" value="eventos">
+            <input type="hidden" name="id" value="0">
+            <label>Artista / Evento</label><input type="text" name="artista" required>
+            <label>Palco</label><input type="text" name="palco" required>
+            <label>Data</label><input type="date" name="data" required>
+            <label>Horario</label><input type="time" name="horario" required>
+            <label>Categoria</label><input type="text" name="categoria" value="Show">
+            <label>Status</label>
+            <select name="status">
+                <option value="em_breve">Em breve</option>
+                <option value="proxima_atracao">Proxima atracao</option>
+                <option value="ao_vivo">Ao vivo</option>
+                <option value="finalizado">Finalizado</option>
+            </select>
+            <label>Descricao</label><textarea name="descricao" rows="2"></textarea>
+            <button class="btn btn-primary btn-xl" type="submit">Atualizar evento</button>
+        </form>
+    </div>
+</div>
 
 </main>
 </div>

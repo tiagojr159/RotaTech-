@@ -210,6 +210,72 @@
     });
   };
 
+  const setupAdminPanel = () => {
+    const panel = $("[data-admin-panel]");
+    if (!panel) return;
+
+    const setTab = (tab) => {
+      $$("[data-admin-tab-button]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.adminTabButton === tab);
+      });
+      $$("[data-admin-tab-panel]").forEach((section) => {
+        section.classList.toggle("hidden", section.dataset.adminTabPanel !== tab);
+      });
+    };
+
+    setTab(panel.dataset.adminActiveTab || "hospedagem");
+    $$("[data-admin-tab-button]").forEach((button) => {
+      button.addEventListener("click", () => setTab(button.dataset.adminTabButton || "hospedagem"));
+    });
+
+    $$("[data-edit-hospedagem]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const form = $("#form-edit-hospedagem");
+        if (!form) return;
+        form.elements.id.value = button.dataset.id || "0";
+        form.elements.nome.value = button.dataset.nome || "";
+        form.elements.categoria.value = button.dataset.categoria || "hotel";
+        form.elements.endereco.value = button.dataset.endereco || "";
+        form.elements.cidade.value = button.dataset.cidade || "Arcoverde, Pernambuco";
+        form.elements.latitude.value = button.dataset.latitude || "";
+        form.elements.longitude.value = button.dataset.longitude || "";
+        form.elements.imagem_atual.value = button.dataset.imagem || "";
+      });
+    });
+
+    $$("[data-edit-restaurante]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const form = $("#form-edit-restaurante");
+        if (!form) return;
+        form.elements.id.value = button.dataset.id || "0";
+        form.elements.nome.value = button.dataset.nome || "";
+        form.elements.categoria.value = button.dataset.categoria || "";
+        form.elements.distancia.value = button.dataset.distancia || "";
+        form.elements.avaliacao.value = button.dataset.avaliacao || "4.5";
+        form.elements.faixa_preco.value = button.dataset.faixa || "$$";
+        form.elements.aberto_ate.value = button.dataset.aberto || "23:00";
+        form.elements.prato_destaque.value = button.dataset.prato || "";
+        form.elements.preco_prato.value = button.dataset.preco || "";
+        form.elements.descricao.value = button.dataset.descricao || "";
+      });
+    });
+
+    $$("[data-edit-evento]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const form = $("#form-edit-evento");
+        if (!form) return;
+        form.elements.id.value = button.dataset.id || "0";
+        form.elements.artista.value = button.dataset.artista || "";
+        form.elements.palco.value = button.dataset.palco || "";
+        form.elements.data.value = button.dataset.data || "";
+        form.elements.horario.value = button.dataset.horario || "";
+        form.elements.categoria.value = button.dataset.categoria || "Show";
+        form.elements.status.value = button.dataset.status || "em_breve";
+        form.elements.descricao.value = button.dataset.descricao || "";
+      });
+    });
+  };
+
   const setupModals = () => {
     $$("[data-open-modal]").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -539,6 +605,7 @@
     setupProgramacaoFilters();
     setupRestaurantes();
     setupHospedagem();
+    setupAdminPanel();
     setupModals();
     setupFriendSelection();
     setupPrivacyPicker();

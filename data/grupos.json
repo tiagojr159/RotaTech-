@@ -1,0 +1,53 @@
+[
+    {
+        "id": 1,
+        "nome": "Amantes do Forró",
+        "capa": "assets\/img\/group-amantes.svg",
+        "privacidade": "publico",
+        "codigo": "FORRO26",
+        "vip": true,
+        "membros": [
+            1,
+            2,
+            3,
+            4
+        ],
+        "roteiro": [
+            1,
+            2,
+            3
+        ],
+        "criado_por": 3
+    },
+    {
+        "id": 2,
+        "nome": "Caravana Arcoverde",
+        "capa": "assets\/img\/group-caravana.svg",
+        "privacidade": "publico",
+        "codigo": "CARAVA26",
+        "vip": false,
+        "membros": [
+            1,
+            4,
+            5
+        ],
+        "roteiro": [
+            4
+        ],
+        "criado_por": 5
+    },
+    {
+        "id": 3,
+        "nome": "Arraial do Sertão",
+        "capa": "assets\/img\/group-arraial.svg",
+        "privacidade": "privado",
+        "codigo": "SERTAO26",
+        "vip": false,
+        "membros": [
+            3,
+            5
+        ],
+        "roteiro": [],
+        "criado_por": 3
+    }
+]

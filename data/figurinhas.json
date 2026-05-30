@@ -1,0 +1,74 @@
+[
+    {
+        "id": 1,
+        "titulo": "Eu vivi o São João de Arcoverde",
+        "descricao": "Conquista inicial.",
+        "imagem": "assets\/img\/sticker-vivi.svg",
+        "categoria": "conquista",
+        "desbloqueada": true,
+        "progresso": 100
+    },
+    {
+        "id": 2,
+        "titulo": "Sanfona",
+        "descricao": "Som que embala a festa.",
+        "imagem": "assets\/img\/sticker-sanfona.svg",
+        "categoria": "instrumento",
+        "desbloqueada": false,
+        "progresso": 0
+    },
+    {
+        "id": 3,
+        "titulo": "Fogueira",
+        "descricao": "Calor da tradição.",
+        "imagem": "assets\/img\/sticker-fogueira.svg",
+        "categoria": "tradição",
+        "desbloqueada": false,
+        "progresso": 0
+    },
+    {
+        "id": 4,
+        "titulo": "Bandeirinhas",
+        "descricao": "Cores da vila.",
+        "imagem": "assets\/img\/sticker-bandeirinhas.svg",
+        "categoria": "decoração",
+        "desbloqueada": false,
+        "progresso": 0
+    },
+    {
+        "id": 5,
+        "titulo": "Cacto do Sertão",
+        "descricao": "Ícone da região.",
+        "imagem": "assets\/img\/sticker-cacto.svg",
+        "categoria": "natureza",
+        "desbloqueada": false,
+        "progresso": 0
+    },
+    {
+        "id": 6,
+        "titulo": "QR Code Secreto",
+        "descricao": "Ponto interativo encontrado.",
+        "imagem": "assets\/img\/sticker-qr.svg",
+        "categoria": "digital",
+        "desbloqueada": false,
+        "progresso": 0
+    },
+    {
+        "id": 7,
+        "titulo": "Restaurante Visitado",
+        "descricao": "Sabores descobertos.",
+        "imagem": "assets\/img\/sticker-rest.svg",
+        "categoria": "gastronomia",
+        "desbloqueada": false,
+        "progresso": 0
+    },
+    {
+        "id": 8,
+        "titulo": "Show Assistido",
+        "descricao": "Música ao vivo curtida.",
+        "imagem": "assets\/img\/sticker-show.svg",
+        "categoria": "show",
+        "desbloqueada": false,
+        "progresso": 0
+    }
+]

@@ -1,0 +1,5 @@
+﻿<svg xmlns='http://www.w3.org/2000/svg' width='600' height='600' viewBox='0 0 600 600'>
+  <rect width='600' height='600' rx='40' fill='#8e8070'/>
+  <circle cx='300' cy='300' r='170' fill='rgba(255,255,255,.25)'/>
+  <text x='300' y='340' fill='white' font-family='Segoe UI Emoji,Segoe UI,Arial' font-size='180' text-anchor='middle'>?</text>
+</svg>

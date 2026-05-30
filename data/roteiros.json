@@ -1,0 +1,63 @@
+[
+    {
+        "id": 1,
+        "user_id": 1,
+        "tipo": "pessoal",
+        "grupo_id": null,
+        "itens": [
+            {
+                "id": 1,
+                "horario": "19:00",
+                "titulo": "Show Alceu Valença",
+                "local": "Palco Multicultural",
+                "tipo": "show",
+                "sugerido_por": "Você",
+                "status": "agora"
+            },
+            {
+                "id": 2,
+                "horario": "21:30",
+                "titulo": "Bodega do Zé",
+                "local": "Vila de Todos os Santos",
+                "tipo": "gastronomia",
+                "sugerido_por": "Mariana",
+                "status": "pendente"
+            }
+        ]
+    },
+    {
+        "id": 2,
+        "user_id": null,
+        "tipo": "grupo",
+        "grupo_id": 1,
+        "itens": [
+            {
+                "id": 1,
+                "horario": "20:00",
+                "titulo": "Show de Alceu Valença",
+                "local": "Palco Principal",
+                "tipo": "show",
+                "sugerido_por": "Lucas",
+                "status": "confirmado"
+            },
+            {
+                "id": 2,
+                "horario": "22:30",
+                "titulo": "Jantar na Bodega do Zé",
+                "local": "Polo Gastronômico",
+                "tipo": "gastronomia",
+                "sugerido_por": "Maria",
+                "status": "confirmado"
+            },
+            {
+                "id": 3,
+                "horario": "00:00",
+                "titulo": "Trio Pé de Serra",
+                "local": "Polo Gastronômico",
+                "tipo": "show",
+                "sugerido_por": "Você",
+                "status": "confirmado"
+            }
+        ]
+    }
+]

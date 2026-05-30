@@ -1,0 +1,58 @@
+[
+    {
+        "id": 1,
+        "nome": "O Casarão do Forró",
+        "categoria": "Regional Nordestina",
+        "distancia": "1.2km",
+        "avaliacao": 4.9,
+        "faixa_preco": "$$$",
+        "aberto_ate": "03:00",
+        "imagem": "assets\/img\/rest-casarao.svg",
+        "prato_destaque": "Baião Cremoso da Vila",
+        "preco_prato": "R$ 36,00",
+        "descricao": "Sabor raiz com ingredientes da região.",
+        "lotacao": "movimento_moderado"
+    },
+    {
+        "id": 2,
+        "nome": "Churrasco da Vila",
+        "categoria": "Carnes e Parrilla",
+        "distancia": "0.5km",
+        "avaliacao": 4.7,
+        "faixa_preco": "$$",
+        "aberto_ate": "00:00",
+        "imagem": "assets\/img\/rest-churrasco.svg",
+        "prato_destaque": "Escondidinho de Carne de Sol",
+        "preco_prato": "R$ 42,00",
+        "descricao": "Cortes especiais e clima de arraial.",
+        "lotacao": "alta_lotacao"
+    },
+    {
+        "id": 3,
+        "nome": "Bodega do Zé",
+        "categoria": "Petiscos",
+        "distancia": "0.3km",
+        "avaliacao": 4.8,
+        "faixa_preco": "$$",
+        "aberto_ate": "02:00",
+        "imagem": "assets\/img\/rest-bodega.svg",
+        "prato_destaque": "Macaxeira com Charque",
+        "preco_prato": "R$ 29,00",
+        "descricao": "Petiscos rápidos para antes dos shows.",
+        "lotacao": "pouco_movimento"
+    },
+    {
+        "id": 4,
+        "nome": "Vila de Todos os Santos",
+        "categoria": "Cozinha Contemporânea",
+        "distancia": "1.0km",
+        "avaliacao": 4.6,
+        "faixa_preco": "$$$",
+        "aberto_ate": "01:30",
+        "imagem": "assets\/img\/rest-vila.svg",
+        "prato_destaque": "Risoto de Queijo Coalho",
+        "preco_prato": "R$ 54,00",
+        "descricao": "Ambiente elegante com toque regional.",
+        "lotacao": "movimento_moderado"
+    }
+]

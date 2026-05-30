@@ -1,0 +1,62 @@
+[
+    {
+        "id": 1,
+        "artista": "Alceu Valença",
+        "palco": "Palco Multicultural",
+        "data": "2026-06-24",
+        "horario": "22:00",
+        "status": "ao_vivo",
+        "imagem": "assets\/img\/atracao-alceu.svg",
+        "categoria": "Forró",
+        "descricao": "Clássicos nordestinos com participação especial.",
+        "lotacao": "movimento_moderado"
+    },
+    {
+        "id": 2,
+        "artista": "Elba Ramalho",
+        "palco": "Palco Multicultural",
+        "data": "2026-06-24",
+        "horario": "00:30",
+        "status": "proxima_atracao",
+        "imagem": "assets\/img\/atracao-elba.svg",
+        "categoria": "Forró",
+        "descricao": "Grandes sucessos em noite histórica no pátio.",
+        "lotacao": "alta_lotacao"
+    },
+    {
+        "id": 3,
+        "artista": "Trio Pé de Serra",
+        "palco": "Polo Gastronômico",
+        "data": "2026-06-24",
+        "horario": "21:00",
+        "status": "finalizado",
+        "imagem": "assets\/img\/atracao-trio.svg",
+        "categoria": "Pé de Serra",
+        "descricao": "Xote tradicional com sanfona, zabumba e triângulo.",
+        "lotacao": "pouco_movimento"
+    },
+    {
+        "id": 4,
+        "artista": "Orquestra Sanfônica",
+        "palco": "Polo Multicultural",
+        "data": "2026-06-24",
+        "horario": "23:30",
+        "status": "proxima_atracao",
+        "imagem": "assets\/img\/atracao-orquestra.svg",
+        "categoria": "Instrumental",
+        "descricao": "Repertório junino em formação especial.",
+        "lotacao": "movimento_moderado"
+    },
+    {
+        "id": 5,
+        "artista": "Quadrilha Junina",
+        "palco": "Palco Principal",
+        "data": "2026-06-24",
+        "horario": "20:00",
+        "status": "finalizado",
+        "imagem": "assets\/img\/atracao-quadrilha.svg",
+        "categoria": "Dança",
+        "descricao": "Apresentação campeã com enredo regional.",
+        "lotacao": "alta_lotacao"
+    }
+]

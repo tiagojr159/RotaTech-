@@ -1,0 +1,56 @@
+﻿[
+    {
+        "id":  1,
+        "nome":  "Posto de SaÃºde",
+        "tipo":  "saude",
+        "local":  "AtrÃ¡s do Palco Principal",
+        "distancia":  "150m",
+        "cor":  "#22c55e",
+        "icone":  "fa-briefcase-medical"
+    },
+    {
+        "id":  2,
+        "nome":  "SanitÃ¡rios Premium",
+        "tipo":  "sanitario",
+        "local":  "PraÃ§a de AlimentaÃ§Ã£o",
+        "distancia":  "50m",
+        "cor":  "#c96f2b",
+        "icone":  "fa-restroom"
+    },
+    {
+        "id":  3,
+        "nome":  "Base de SeguranÃ§a",
+        "tipo":  "seguranca",
+        "local":  "Entrada Sul",
+        "distancia":  "300m",
+        "cor":  "#b91c1c",
+        "icone":  "fa-shield-halved"
+    },
+    {
+        "id":  4,
+        "nome":  "Ponto de TÃ¡xi",
+        "tipo":  "mobilidade",
+        "local":  "Rua da Feira",
+        "distancia":  "220m",
+        "cor":  "#0f766e",
+        "icone":  "fa-taxi"
+    },
+    {
+        "id":  5,
+        "nome":  "Estacionamento",
+        "tipo":  "mobilidade",
+        "local":  "Lote Norte",
+        "distancia":  "400m",
+        "cor":  "#334155",
+        "icone":  "fa-square-parking"
+    },
+    {
+        "id":  6,
+        "nome":  "Achados e Perdidos",
+        "tipo":  "apoio",
+        "local":  "Central de ServiÃ§os",
+        "distancia":  "180m",
+        "cor":  "#7c3aed",
+        "icone":  "fa-box-open"
+    }
+]

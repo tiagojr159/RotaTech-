@@ -1,0 +1,92 @@
+[
+    {
+        "id": 1,
+        "nome": "João Silva",
+        "usuario": "joaosilva_02",
+        "email": "cordel@arcoverde.com",
+        "senha_hash": "$2y$10$3kUhpYTp2t9OCeNFcYA8h.gHZwjLa63i.yjlThNt5eaW98nE0a8t6",
+        "avatar": "assets\/img\/avatar-joao.svg",
+        "nivel": 12,
+        "titulo": "EXPLORADOR DE ARCOVERDE",
+        "pontos": 850,
+        "criado_em": "2026-06-01",
+        "favoritos": [
+            1,
+            2
+        ],
+        "figurinhas": [
+            1
+        ]
+    },
+    {
+        "id": 2,
+        "nome": "Maria Clara",
+        "usuario": "mariaclaraforro",
+        "email": "maria@arcoverde.com",
+        "senha_hash": "$2y$10$ch00FPRcGnpdmWP7yq2aDuK5g1NSCbVooY5517Dd1Vt6NKosgNcvu",
+        "avatar": "assets\/img\/avatar-maria.svg",
+        "nivel": 10,
+        "titulo": "GUIA DO ARRAIAL",
+        "pontos": 680,
+        "criado_em": "2026-06-02",
+        "favoritos": [],
+        "figurinhas": [
+            1,
+            2
+        ]
+    },
+    {
+        "id": 3,
+        "nome": "Lucas",
+        "usuario": "lucasforro",
+        "email": "lucas@arcoverde.com",
+        "senha_hash": "$2y$10$r\/SXFshjqa7ZMc1\/df\/k7uNxZfiiVSHHhtJb9VRBM6.zQxFma6Nlm",
+        "avatar": "assets\/img\/avatar-lucas.svg",
+        "nivel": 11,
+        "titulo": "MESTRE DA SANFONA",
+        "pontos": 760,
+        "criado_em": "2026-06-02",
+        "favoritos": [
+            3
+        ],
+        "figurinhas": [
+            1,
+            3
+        ]
+    },
+    {
+        "id": 4,
+        "nome": "Beatriz Souza",
+        "usuario": "bia_festiva",
+        "email": "bia@arcoverde.com",
+        "senha_hash": "$2y$10$K4oXNeLmMfn0QKh6Qu3PUeMqr.swyX2MZSGA9xhxfEnDnXLn0qMrO",
+        "avatar": "assets\/img\/avatar-beatriz.svg",
+        "nivel": 8,
+        "titulo": "TRILHEIRA JUNINA",
+        "pontos": 530,
+        "criado_em": "2026-06-03",
+        "favoritos": [],
+        "figurinhas": [
+            1
+        ]
+    },
+    {
+        "id": 5,
+        "nome": "Marta",
+        "usuario": "martadocordeu",
+        "email": "marta@arcoverde.com",
+        "senha_hash": "$2y$10$sPLBR6Btijm123vfPDvQEuPwrPj7SowMt6iWJMtsYoGyxeh2TH1Te",
+        "avatar": "assets\/img\/avatar-marta.svg",
+        "nivel": 9,
+        "titulo": "EMBAIXADORA DA VILA",
+        "pontos": 600,
+        "criado_em": "2026-06-03",
+        "favoritos": [
+            4
+        ],
+        "figurinhas": [
+            1,
+            4
+        ]
+    }
+]

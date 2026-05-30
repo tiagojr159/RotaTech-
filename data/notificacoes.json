@@ -1,0 +1,23 @@
+[
+    {
+        "id": 1,
+        "titulo": "Show começa em 15 minutos",
+        "descricao": "Elba Ramalho sobe ao Palco Multicultural.",
+        "tipo": "alerta",
+        "lida": false
+    },
+    {
+        "id": 2,
+        "titulo": "Restaurante próximo aberto até 03:00",
+        "descricao": "O Casarão do Forró está a 1.2km.",
+        "tipo": "gastronomia",
+        "lida": false
+    },
+    {
+        "id": 3,
+        "titulo": "Base de segurança a 300m",
+        "descricao": "Direção recomendada: Entrada Sul.",
+        "tipo": "seguranca",
+        "lida": false
+    }
+]

@@ -10,7 +10,7 @@ $activeTab = $activeTab ?? '';
 ?>
 <nav class="bottom-nav" data-bottom-nav>
     <a href="<?= sanitize(appUrl()); ?>" class="nav-item <?= $activeTab === 'home' ? 'active' : ''; ?>" data-tab="home">
-        <i class="fa-regular fa-house"></i>
+        <i class="fa-solid fa-house-chimney"></i>
         <span>Início</span>
     </a>
     <a href="programacao.php" class="nav-item <?= $activeTab === 'explorar' ? 'active' : ''; ?>" data-tab="explorar">

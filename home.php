@@ -39,7 +39,6 @@ include __DIR__ . '/includes/header.php';
                 <img src="logomarca.png" alt="RotaTech Arcoverde" class="hero-logo">
                 <div>
                     <p class="hero-location">ARCOVERDE, PE</p>
-                    <strong>RotaTech Arcoverde</strong>
                 </div>
             </div>
             <span class="chip light"><i class="fa-regular fa-sun"></i> 22C</span>

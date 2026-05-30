@@ -30,13 +30,6 @@ include __DIR__ . '/includes/header.php';
         </label>
         <input type="file" id="album-photo-input" name="album_photo" accept=".jpg,.jpeg,.png,.webp,image/*">
     </form>
-    <?php foreach ($figurinhas as $figurinha): ?>
-        <?php $locked = !in_array((int) $figurinha['id'], $user['figurinhas'] ?? [], true); ?>
-        <button class="sticker-card <?= $locked ? 'locked' : 'unlocked'; ?>" data-sticker-id="<?= (int) $figurinha['id']; ?>">
-            <img src="<?= sanitize((string) $figurinha['imagem']); ?>" alt="<?= sanitize((string) $figurinha['titulo']); ?>">
-            <?php if ($locked): ?><span class="lock"><i class="fa-solid fa-lock"></i></span><?php endif; ?>
-        </button>
-    <?php endforeach; ?>
 </section>
 
 <section class="album-progress">

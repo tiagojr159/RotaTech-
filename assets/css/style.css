@@ -129,6 +129,19 @@ a {
   box-shadow: var(--app-shadow);
 }
 
+@media (max-width: 767px) {
+  .app-shell {
+    padding: 0;
+  }
+
+  .mobile-app {
+    width: 100%;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
 @media (min-width: 768px) {
   .mobile-app {
     border-radius: 24px;
@@ -654,17 +667,34 @@ a {
   padding-top: 0;
 }
 
+.auth-screen.mobile-app,
+.splash-screen.mobile-app {
+  min-height: calc(100dvh - 24px);
+  max-height: calc(100dvh - 24px);
+  overflow-x: hidden;
+}
+
 .auth-wrap {
   text-align: center;
-  padding: 0 8px 36px;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
 }
 
 .auth-hero {
   position: relative;
-  margin: 0 -8px;
-  padding: 12px 18px 132px;
+  min-height: 340px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
   overflow: hidden;
-  background: #2a160d;
+  border-radius: 18px 18px 0 0;
+  background:
+    linear-gradient(180deg, rgba(18, 8, 5, 0.1) 0%, rgba(18, 8, 5, 0.28) 42%, rgba(18, 8, 5, 0.88) 100%),
+    url("../../noite_arcoverde.jpeg") center center / cover no-repeat,
+    #2a160d;
 }
 
 .auth-hero-bg,
@@ -681,9 +711,8 @@ a {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(30, 17, 10, 0.18) 0%, rgba(30, 17, 10, 0.58) 72%, rgba(248, 241, 232, 0.96) 100%),
-    radial-gradient(circle at 18% 18%, rgba(255, 207, 120, 0.28), transparent 28%),
-    radial-gradient(circle at 82% 14%, rgba(201, 111, 43, 0.24), transparent 24%);
+    linear-gradient(90deg, rgba(21, 8, 4, 0.42), transparent 44%, rgba(21, 8, 4, 0.24)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 24%);
   pointer-events: none;
 }
 
@@ -695,7 +724,14 @@ a {
 .flags-top {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 18px;
+  margin-bottom: auto;
+}
+
+.auth-hero-copy {
+  display: grid;
+  justify-items: flex-start;
+  gap: 8px;
+  text-align: left;
 }
 
 .flag {
@@ -721,9 +757,10 @@ a {
 }
 
 .auth-logo-badge {
-  width: 102px;
-  height: 102px;
-  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.22);
+  width: 86px;
+  height: 86px;
+  margin: 0 0 10px;
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.24);
 }
 
 .logo-lg {
@@ -739,7 +776,7 @@ a {
 
 .auth-title,
 .splash-title {
-  margin: 6px 0 2px;
+  margin: 0;
   font-family: "Baloo 2", system-ui;
   color: #fff5ea;
   font-size: 52px;
@@ -747,26 +784,62 @@ a {
   text-shadow: 0 10px 24px rgba(0, 0, 0, 0.32);
 }
 
+.auth-title {
+  font-size: 50px;
+  max-width: 260px;
+}
+
+.splash-title {
+  font-size: 58px;
+  max-width: 310px;
+}
+
 .auth-sub {
   margin: 0;
-  letter-spacing: 1.6px;
-  font-size: 16px;
-  color: rgba(255, 247, 236, 0.92);
+  letter-spacing: 0;
+  font-size: 13px;
+  color: #ffd8bc;
+  font-weight: 800;
+  text-transform: uppercase;
+  text-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
 }
 
 .auth-card {
   text-align: left;
-  padding: 18px 14px;
-  background: #f4eee5;
+  padding: 18px;
+  background: rgba(255, 248, 239, 0.96);
 }
 
 .auth-card-floating {
-  margin-top: -84px;
+  margin-top: 0;
   position: relative;
   z-index: 2;
-  border-radius: 22px;
-  box-shadow: 0 24px 60px rgba(58, 34, 20, 0.16);
-  backdrop-filter: blur(4px);
+  border-radius: 0 0 18px 18px;
+  border-top: 0;
+  box-shadow: 0 22px 54px rgba(58, 34, 20, 0.14);
+  backdrop-filter: blur(8px);
+}
+
+.auth-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.auth-card-head strong {
+  font-family: "Baloo 2", system-ui;
+  font-size: 26px;
+  line-height: 1;
+  color: var(--secondary);
+}
+
+.auth-card-head span {
+  color: var(--primary);
+  font-weight: 800;
+  font-size: 13px;
+  text-align: right;
 }
 
 .input-icon {
@@ -774,9 +847,9 @@ a {
   align-items: center;
   gap: 8px;
   border: 1px solid var(--border);
-  background: var(--card);
-  border-radius: 12px;
-  padding: 12px 14px;
+  background: #fffaf4;
+  border-radius: 14px;
+  padding: 13px 14px;
   margin: 6px 0 14px;
 }
 
@@ -891,16 +964,14 @@ label {
 }
 
 .signup-note {
-  margin-top: 24px;
+  margin: 16px 0 0;
   color: #5a4e46;
+  font-weight: 700;
 }
 
+.signup-note a,
 .signup-link {
-  display: inline-block;
-  margin-top: 4px;
   color: var(--primary);
-  font-size: 40px;
-  font-family: "Baloo 2", system-ui;
   font-weight: 800;
   border-bottom: 2px solid #e8c8ae;
 }
@@ -971,36 +1042,36 @@ textarea::placeholder {
 .strong { font-weight: 800; }
 
 .splash-wrap {
-  min-height: calc(100dvh - 50px);
+  min-height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 18px;
   text-align: center;
-  padding: 18px 8px 28px;
+  padding: 0;
 }
 
 .splash-hero {
   position: relative;
   overflow: hidden;
-  border-radius: 28px;
-  padding: 20px 20px 22px;
-  min-height: 540px;
+  border-radius: 18px;
+  padding: 18px;
+  min-height: min(760px, calc(100dvh - 48px));
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  background: #24140e;
-  box-shadow: 0 28px 70px rgba(44, 25, 15, 0.2);
+  justify-content: flex-end;
+  background:
+    linear-gradient(180deg, rgba(17, 8, 5, 0.18) 0%, rgba(17, 8, 5, 0.1) 28%, rgba(17, 8, 5, 0.5) 58%, rgba(17, 8, 5, 0.88) 100%),
+    url("../../noite_arcoverde.jpeg") center center / cover no-repeat,
+    #24140e;
+  box-shadow: 0 28px 70px rgba(44, 25, 15, 0.18);
 }
 
 .splash-hero-overlay {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(15, 10, 8, 0.08) 0%, rgba(15, 10, 8, 0.56) 60%, rgba(15, 10, 8, 0.86) 100%),
-    radial-gradient(circle at 18% 16%, rgba(255, 210, 130, 0.3), transparent 20%),
-    radial-gradient(circle at 82% 18%, rgba(201, 111, 43, 0.28), transparent 22%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 30%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 22%),
+    linear-gradient(90deg, rgba(19, 8, 5, 0.42), transparent 38%, rgba(19, 8, 5, 0.28));
   pointer-events: none;
 }
 
@@ -1009,78 +1080,72 @@ textarea::placeholder {
   z-index: 1;
 }
 
+.splash-top {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  right: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .splash-badge {
-  align-self: flex-start;
   border-radius: 999px;
-  padding: 8px 14px;
-  background: rgba(255, 248, 239, 0.14);
-  border: 1px solid rgba(255, 248, 239, 0.24);
+  padding: 8px 12px;
+  background: rgba(35, 19, 13, 0.52);
+  border: 1px solid rgba(255, 248, 239, 0.22);
   color: #fff4e6;
   font-size: 12px;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
   text-transform: uppercase;
   backdrop-filter: blur(10px);
 }
 
 .splash-logo {
-  margin: 18px auto 0;
-  width: 116px;
-  height: 116px;
-  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+  margin: 0;
+  width: 78px;
+  height: 78px;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.24);
 }
 
 .splash-hero-copy {
-  margin-top: auto;
+  text-align: left;
+  padding-top: 210px;
 }
 
 .splash-kicker {
-  margin: 0 0 8px;
+  margin: 0 0 10px;
   color: #ffd8bc;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
+  letter-spacing: 0;
   font-size: 12px;
   font-weight: 800;
+  text-shadow: 0 8px 22px rgba(0, 0, 0, 0.32);
 }
 
 .splash-copy {
   color: rgba(255, 244, 232, 0.92);
-  margin: 12px auto 0;
-  max-width: 290px;
+  margin: 12px 0 0;
+  max-width: 320px;
   font-size: 17px;
   line-height: 1.5;
-}
-
-.splash-hero-footer {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.splash-hero-footer span {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  border-radius: 999px;
-  padding: 10px 14px;
-  background: rgba(255, 248, 239, 0.14);
-  border: 1px solid rgba(255, 248, 239, 0.2);
-  color: #fff4e8;
-  font-size: 13px;
-  font-weight: 700;
-  backdrop-filter: blur(8px);
+  text-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
 }
 
 .splash-actions {
   display: grid;
-  gap: 12px;
+  gap: 10px;
+  margin-top: 22px;
 }
 
 .link-inline {
-  color: #4e4138;
-  font-weight: 700;
+  color: rgba(255, 248, 239, 0.9);
+  font-weight: 800;
+  text-align: center;
+  text-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
 }
 
 .footer-mini {

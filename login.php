@@ -33,19 +33,21 @@ include __DIR__ . '/includes/header.php';
 ?>
 <section class="auth-wrap">
     <div class="auth-hero">
-        <img src="noite_arcoverde.jpeg" alt="Noite em Arcoverde" class="auth-hero-bg" loading="eager" fetchpriority="high">
         <div class="auth-hero-overlay"></div>
-        <div class="flags-top">
-            <span class="flag c1"></span><span class="flag c2"></span><span class="flag c3"></span><span class="flag c4"></span><span class="flag c5"></span>
+        <div class="auth-hero-copy">
+            <div class="logo-badge auth-logo-badge">
+                <img src="logomarca.png" alt="RotaTech Arcoverde">
+            </div>
+            <p class="auth-sub">Arcoverde • Pernambuco</p>
+            <h2 class="auth-title">Entrar na<br>festa</h2>
         </div>
-        <div class="logo-badge auth-logo-badge">
-            <img src="logomarca.png" alt="RotaTech Arcoverde">
-        </div>
-        <h2 class="auth-title">SAO JOAO 2026</h2>
-        <p class="auth-sub">ARCOVERDE • PERNAMBUCO</p>
     </div>
 
     <form class="card auth-card auth-card-floating" method="post" autocomplete="on">
+        <div class="auth-card-head">
+            <strong>Sao Joao 2026</strong>
+            <span>RotaTech Arcoverde</span>
+        </div>
         <?php if ($error): ?>
             <p class="alert alert-danger"><?= sanitize($error); ?></p>
         <?php endif; ?>
@@ -67,11 +69,7 @@ include __DIR__ . '/includes/header.php';
         </div>
         <button class="btn btn-primary btn-xl" type="submit">Entrar</button>
     </form>
-    <p class="signup-note">Ainda nao tem conta?</p>
-    <a href="cadastro.php" class="signup-link">Criar Cadastro</a>
-    <div class="icons-foot">
-        <i class="fa-solid fa-leaf"></i><i class="fa-solid fa-fire"></i><i class="fa-solid fa-music"></i>
-    </div>
+    <p class="signup-note">Ainda nao tem conta? <a href="cadastro.php">Criar cadastro</a></p>
 </section>
 </main>
 </div>

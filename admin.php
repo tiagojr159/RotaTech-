@@ -7,7 +7,7 @@ requireAdmin();
 $message = '';
 $error = '';
 $activeAdminTab = sanitize($_POST['admin_tab'] ?? $_GET['tab'] ?? 'hospedagem');
-if (!in_array($activeAdminTab, ['usuarios', 'hospedagem', 'restaurantes', 'eventos', 'relatorios', 'album', 'conversas', 'localizacoes'], true)) {
+if (!in_array($activeAdminTab, ['usuarios', 'hospedagem', 'restaurantes', 'eventos', 'relatorios', 'album', 'conversas', 'localizacoes', 'notificacoes'], true)) {
     $activeAdminTab = 'hospedagem';
 }
 
@@ -21,6 +21,7 @@ $grupos = readJson('grupos.json');
 $convites = readJson('convites.json');
 $chatHistory = readJson('chat_history.json');
 $userLocations = readJson('user_locations.json');
+$notificacoes = readJson('notificacoes.json');
 
 $nextId = static function (array $rows): int {
     $max = 0;
@@ -244,6 +245,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    if ($action === 'save_notification') {
+        $titulo = sanitize($_POST['titulo'] ?? '');
+        $descricao = sanitize($_POST['descricao'] ?? '');
+        $tipo = sanitize($_POST['tipo'] ?? 'alerta');
+        $soundDuration = (int) ($_POST['sound_duration_minutes'] ?? 10);
+        if (!in_array($soundDuration, [10, 20], true)) {
+            $soundDuration = 10;
+        }
+
+        if ($titulo === '' || $descricao === '') {
+            $error = 'Informe o titulo e a mensagem da notificacao.';
+        } else {
+            $notificacoes[] = [
+                'id' => $nextId($notificacoes),
+                'titulo' => $titulo,
+                'descricao' => $descricao,
+                'tipo' => in_array($tipo, ['alerta', 'informacao', 'seguranca'], true) ? $tipo : 'alerta',
+                'created_at' => date('c'),
+                'sound_enabled' => true,
+                'sound_duration_minutes' => $soundDuration,
+                'sound_until' => date('c', strtotime("+{$soundDuration} minutes")),
+            ];
+            writeJson('notificacoes.json', $notificacoes);
+            $message = 'Alerta sonoro enviado para todos os usuarios.';
+        }
+    }
+
     if ($action === 'delete_album_photo') {
         $fotoId = (int) ($_POST['foto_id'] ?? 0);
         $deleted = false;
@@ -280,6 +308,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $programacao = readJson('programacao.json');
     $users = readJson('users.json');
     $albumFotos = readJson('album_fotos.json');
+    $notificacoes = readJson('notificacoes.json');
 }
 
 $report = buildAdminReportData($users, $albumFotos, $programacao, $roteiros, $grupos, $convites);
@@ -336,6 +365,7 @@ include __DIR__ . '/includes/header.php';
         <a href="admin.php?tab=album" class="admin-tab-btn <?= $activeAdminTab === 'album' ? 'active' : ''; ?>"><i class="fa-solid fa-images"></i><span>Fotos da galera</span></a>
         <a href="admin.php?tab=conversas" class="admin-tab-btn <?= $activeAdminTab === 'conversas' ? 'active' : ''; ?>"><i class="fa-solid fa-comments"></i><span>Historico do chatbot</span></a>
         <a href="admin.php?tab=localizacoes" class="admin-tab-btn <?= $activeAdminTab === 'localizacoes' ? 'active' : ''; ?>"><i class="fa-solid fa-map-location-dot"></i><span>Mapa de acessos</span></a>
+        <a href="admin.php?tab=notificacoes" class="admin-tab-btn <?= $activeAdminTab === 'notificacoes' ? 'active' : ''; ?>"><i class="fa-solid fa-bell"></i><span>Notificacoes</span></a>
         <a href="admin.php?tab=relatorios" class="admin-tab-btn <?= $activeAdminTab === 'relatorios' ? 'active' : ''; ?>"><i class="fa-solid fa-chart-line"></i><span>Relatorio</span></a>
     </nav>
 
@@ -602,6 +632,35 @@ include __DIR__ . '/includes/header.php';
                 <p>Os pontos vao aparecer quando os usuarios autorizarem a localizacao no navegador.</p>
             </article>
         <?php endif; ?>
+    </section>
+
+    <section class="admin-section <?= $activeAdminTab === 'notificacoes' ? '' : 'hidden'; ?>">
+        <div class="section-head admin-section-head">
+            <div>
+                <h3>Notificacoes globais</h3>
+                <p class="muted">Envie um aviso para todos os usuarios. O som toca somente durante a janela escolhida.</p>
+            </div>
+            <button type="button" class="btn btn-primary" data-open-modal="modal-notification-create">
+                <i class="fa-solid fa-volume-high"></i> Cadastrar alerta sonoro
+            </button>
+        </div>
+        <div class="admin-notification-list">
+            <?php foreach (array_reverse($notificacoes) as $notification): ?>
+                <article class="card admin-notification-item">
+                    <span class="point-icon"><i class="fa-solid fa-bell"></i></span>
+                    <div>
+                        <strong><?= sanitize((string) ($notification['titulo'] ?? 'Alerta')); ?></strong>
+                        <p><?= sanitize((string) ($notification['descricao'] ?? '')); ?></p>
+                        <small>
+                            <?= !empty($notification['created_at']) ? sanitize($formatDateTime((string) $notification['created_at'])) : 'Notificacao inicial'; ?>
+                            <?php if (!empty($notification['sound_enabled'])): ?>
+                                - som por <?= (int) ($notification['sound_duration_minutes'] ?? 10); ?> minutos
+                            <?php endif; ?>
+                        </small>
+                    </div>
+                </article>
+            <?php endforeach; ?>
+        </div>
     </section>
 
     <section class="admin-section <?= $activeAdminTab === 'relatorios' ? '' : 'hidden'; ?> admin-report-section" data-admin-report>
@@ -889,6 +948,31 @@ include __DIR__ . '/includes/header.php';
             </select>
             <label>Descricao</label><textarea name="descricao" rows="2"></textarea>
             <button class="btn btn-primary btn-xl" type="submit">Atualizar evento</button>
+        </form>
+    </div>
+</div>
+
+<div class="modal hidden" id="modal-notification-create">
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-content">
+        <h3>Novo alerta sonoro</h3>
+        <form class="stacked-form" method="post">
+            <input type="hidden" name="action" value="save_notification">
+            <input type="hidden" name="admin_tab" value="notificacoes">
+            <label>Titulo</label><input type="text" name="titulo" maxlength="100" required>
+            <label>Mensagem</label><textarea name="descricao" rows="3" maxlength="300" required></textarea>
+            <label>Tipo</label>
+            <select name="tipo">
+                <option value="alerta">Alerta geral</option>
+                <option value="informacao">Informacao</option>
+                <option value="seguranca">Seguranca</option>
+            </select>
+            <label>Janela para tocar o som</label>
+            <select name="sound_duration_minutes">
+                <option value="10">Proximos 10 minutos</option>
+                <option value="20">Proximos 20 minutos</option>
+            </select>
+            <button class="btn btn-primary btn-xl" type="submit">Enviar para todos</button>
         </form>
     </div>
 </div>

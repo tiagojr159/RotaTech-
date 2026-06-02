@@ -49,6 +49,112 @@ if ($userIndex === null) {
 }
 
 switch ($action) {
+    case 'notification_poll':
+        $now = date('c');
+        $presence = readJson('user_presence.json');
+        $presenceIndex = null;
+        foreach ($presence as $index => $item) {
+            if ((int) ($item['user_id'] ?? 0) === (int) $current['id']) {
+                $presenceIndex = $index;
+                break;
+            }
+        }
+
+        $presencePayload = [
+            'user_id' => (int) $current['id'],
+            'user_name' => (string) ($current['nome'] ?? 'Visitante'),
+            'last_seen_at' => $now,
+        ];
+        if ($presenceIndex === null) {
+            $presence[] = $presencePayload;
+        } else {
+            $presence[$presenceIndex] = $presencePayload;
+        }
+        writeJson('user_presence.json', $presence);
+
+        $notifications = readJson('notificacoes.json');
+        usort($notifications, static function (array $a, array $b): int {
+            return (int) ($b['id'] ?? 0) <=> (int) ($a['id'] ?? 0);
+        });
+        $reads = readJson('notification_reads.json');
+        $soundDeliveries = readJson('notification_sound_deliveries.json');
+        $readIds = [];
+        $soundIds = [];
+
+        foreach ($reads as $item) {
+            if ((int) ($item['user_id'] ?? 0) === (int) $current['id']) {
+                $readIds[(int) ($item['notification_id'] ?? 0)] = true;
+            }
+        }
+        foreach ($soundDeliveries as $item) {
+            if ((int) ($item['user_id'] ?? 0) === (int) $current['id']) {
+                $soundIds[(int) ($item['notification_id'] ?? 0)] = true;
+            }
+        }
+
+        $unreadCount = 0;
+        $items = [];
+        foreach (array_slice($notifications, 0, 50) as $notification) {
+            $notificationId = (int) ($notification['id'] ?? 0);
+            $isRead = !empty($readIds[$notificationId]);
+            if (!$isRead) {
+                $unreadCount++;
+            }
+
+            $soundUntil = strtotime((string) ($notification['sound_until'] ?? '')) ?: 0;
+            $items[] = [
+                'id' => $notificationId,
+                'titulo' => (string) ($notification['titulo'] ?? 'Alerta'),
+                'descricao' => (string) ($notification['descricao'] ?? ''),
+                'tipo' => (string) ($notification['tipo'] ?? 'alerta'),
+                'created_at_label' => !empty($notification['created_at'])
+                    ? date('d/m/Y H:i', strtotime((string) $notification['created_at']))
+                    : '',
+                'lida' => $isRead,
+                'should_sound' => !$isRead
+                    && !empty($notification['sound_enabled'])
+                    && empty($soundIds[$notificationId])
+                    && $soundUntil >= time(),
+            ];
+        }
+
+        jsonResponse(['ok' => true, 'notifications' => $items, 'unread_count' => $unreadCount]);
+        break;
+
+    case 'mark_notification_read':
+        $notificationId = (int) ($_POST['notification_id'] ?? 0);
+        $reads = readJson('notification_reads.json');
+        foreach ($reads as $item) {
+            if ((int) ($item['user_id'] ?? 0) === (int) $current['id'] && (int) ($item['notification_id'] ?? 0) === $notificationId) {
+                jsonResponse(['ok' => true]);
+            }
+        }
+        $reads[] = [
+            'user_id' => (int) $current['id'],
+            'notification_id' => $notificationId,
+            'read_at' => date('c'),
+        ];
+        writeJson('notification_reads.json', $reads);
+        jsonResponse(['ok' => true]);
+        break;
+
+    case 'mark_notification_sound_played':
+        $notificationId = (int) ($_POST['notification_id'] ?? 0);
+        $deliveries = readJson('notification_sound_deliveries.json');
+        foreach ($deliveries as $item) {
+            if ((int) ($item['user_id'] ?? 0) === (int) $current['id'] && (int) ($item['notification_id'] ?? 0) === $notificationId) {
+                jsonResponse(['ok' => true]);
+            }
+        }
+        $deliveries[] = [
+            'user_id' => (int) $current['id'],
+            'notification_id' => $notificationId,
+            'played_at' => date('c'),
+        ];
+        writeJson('notification_sound_deliveries.json', $deliveries);
+        jsonResponse(['ok' => true]);
+        break;
+
     case 'registrar_localizacao':
         $latitude = filter_var($_POST['latitude'] ?? null, FILTER_VALIDATE_FLOAT);
         $longitude = filter_var($_POST['longitude'] ?? null, FILTER_VALIDATE_FLOAT);

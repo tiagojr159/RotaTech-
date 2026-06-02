@@ -12,8 +12,6 @@ if (empty($renderHomeAsIndex)) {
 $user = currentUser();
 $programacao = readJson('programacao.json');
 $pontos = readJson('pontos.json');
-$notificacoes = readJson('notificacoes.json');
-$unread = count(array_filter($notificacoes, fn($n) => empty($n['lida'])));
 $collected = count($user['figurinhas'] ?? []);
 $totalAlbum = 24;
 
@@ -24,7 +22,6 @@ $adminShortcut = isAdminUser($user)
     ? '<a href="admin.php" class="icon-btn soft" aria-label="Administrador"><i class="fa-solid fa-shield-halved"></i></a>'
     : '';
 $rightHtml = '
-    <a href="#" class="icon-btn"><i class="fa-regular fa-bell"></i><span class="dot"></span></a>
     ' . $adminShortcut . '
     <a href="perfil.php" class="avatar-link"><img src="' . sanitize($user['avatar']) . '" alt="Avatar" class="avatar-sm"></a>
 ';
@@ -98,7 +95,6 @@ include __DIR__ . '/includes/header.php';
 <article class="card card-soft ai-tip">
     <h4><i class="fa-solid fa-wand-magic-sparkles"></i> Sugestao Inteligente</h4>
     <p>Como voce esta perto do Polo Gastronomico e o show comeca em 40 minutos, recomendamos jantar agora no Casarao do Forro.</p>
-    <div class="alert-mini"><i class="fa-regular fa-bell"></i> <?= $unread; ?> alertas uteis ativos</div>
 </article>
 
 <a href="grupos.php" class="fab-main" aria-label="Ir para grupos"><i class="fa-solid fa-plus"></i></a>

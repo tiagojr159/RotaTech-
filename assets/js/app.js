@@ -973,6 +973,133 @@
     });
   };
 
+  const setupNotifications = () => {
+    const widget = $("[data-notification-widget]");
+    if (!widget) return;
+
+    const toggle = $("[data-notification-toggle]", widget);
+    const close = $("[data-notification-close]", widget);
+    const panel = $("#notification-panel", widget);
+    const list = $("[data-notification-list]", widget);
+    const count = $("[data-notification-count]", widget);
+    if (!toggle || !panel || !list || !count) return;
+
+    let audioContext = null;
+    const getAudioContext = () => {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return null;
+      audioContext ||= new AudioContext();
+      return audioContext;
+    };
+
+    const unlockAudio = () => {
+      const context = getAudioContext();
+      context?.resume?.().catch(() => {});
+    };
+    document.addEventListener("pointerdown", unlockAudio, { once: true });
+
+    const playAlertSound = async () => {
+      const context = getAudioContext();
+      if (!context) return false;
+      try {
+        await context.resume();
+        if (context.state !== "running") return false;
+
+        [0, 0.2, 0.4].forEach((delay) => {
+          const oscillator = context.createOscillator();
+          const gain = context.createGain();
+          oscillator.type = "sine";
+          oscillator.frequency.setValueAtTime(880, context.currentTime + delay);
+          gain.gain.setValueAtTime(0.0001, context.currentTime + delay);
+          gain.gain.exponentialRampToValueAtTime(0.2, context.currentTime + delay + 0.025);
+          gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + delay + 0.16);
+          oscillator.connect(gain);
+          gain.connect(context.destination);
+          oscillator.start(context.currentTime + delay);
+          oscillator.stop(context.currentTime + delay + 0.18);
+        });
+        return true;
+      } catch (_) {
+        return false;
+      }
+    };
+
+    const updateCount = (unreadCount) => {
+      count.textContent = String(unreadCount);
+      count.classList.toggle("hidden", unreadCount < 1);
+    };
+
+    const markAsRead = async (notificationId, item) => {
+      if (item.classList.contains("is-read")) return;
+      try {
+        await postApi({ action: "mark_notification_read", notification_id: String(notificationId) });
+        item.classList.add("is-read");
+        updateCount(Math.max(0, Number(count.textContent || 0) - 1));
+      } catch (_) {}
+    };
+
+    const renderNotifications = (notifications) => {
+      list.replaceChildren();
+      if (!notifications.length) {
+        const empty = document.createElement("p");
+        empty.className = "notification-empty";
+        empty.textContent = "Nenhuma notificacao por enquanto.";
+        list.appendChild(empty);
+        return;
+      }
+
+      notifications.forEach((notification) => {
+        const item = document.createElement("button");
+        const title = document.createElement("strong");
+        const description = document.createElement("span");
+        const date = document.createElement("small");
+        item.type = "button";
+        item.className = `notification-item${notification.lida ? " is-read" : ""}`;
+        title.textContent = notification.titulo || "Alerta";
+        description.textContent = notification.descricao || "";
+        date.textContent = notification.created_at_label || "Aviso do sistema";
+        item.append(title, description, date);
+        item.addEventListener("click", () => markAsRead(notification.id, item));
+        list.appendChild(item);
+      });
+    };
+
+    const refreshNotifications = async () => {
+      try {
+        const json = await postApi({ action: "notification_poll" });
+        const notifications = json.notifications || [];
+        updateCount(Number(json.unread_count || 0));
+        renderNotifications(notifications);
+
+        const soundNotifications = notifications.filter((notification) => notification.should_sound);
+        if (soundNotifications.length && await playAlertSound()) {
+          await Promise.all(soundNotifications.map((notification) => postApi({
+            action: "mark_notification_sound_played",
+            notification_id: String(notification.id),
+          }).catch(() => null)));
+        }
+      } catch (_) {}
+    };
+
+    const setOpen = (open) => {
+      panel.classList.toggle("hidden", !open);
+      toggle.setAttribute("aria-expanded", String(open));
+      if (open) refreshNotifications();
+    };
+
+    toggle.addEventListener("click", () => {
+      unlockAudio();
+      setOpen(panel.classList.contains("hidden"));
+    });
+    close?.addEventListener("click", () => setOpen(false));
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) refreshNotifications();
+    });
+
+    refreshNotifications();
+    window.setInterval(refreshNotifications, 30000);
+  };
+
   const setupAdminAccessMap = () => {
     const element = $("[data-admin-access-map]");
     if (!element || !window.L) return;
@@ -989,10 +1116,29 @@
     }).addTo(map);
 
     const markers = [];
+    const coordinateTotals = new Map();
+    const coordinateUses = new Map();
     locations.forEach((location) => {
       const latitude = Number(location.latitude);
       const longitude = Number(location.longitude);
       if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return;
+      const key = `${latitude.toFixed(6)},${longitude.toFixed(6)}`;
+      coordinateTotals.set(key, (coordinateTotals.get(key) || 0) + 1);
+    });
+
+    locations.forEach((location) => {
+      const latitude = Number(location.latitude);
+      const longitude = Number(location.longitude);
+      if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return;
+
+      const coordinateKey = `${latitude.toFixed(6)},${longitude.toFixed(6)}`;
+      const totalAtCoordinate = coordinateTotals.get(coordinateKey) || 1;
+      const indexAtCoordinate = coordinateUses.get(coordinateKey) || 0;
+      coordinateUses.set(coordinateKey, indexAtCoordinate + 1);
+      const angle = (Math.PI * 2 * indexAtCoordinate) / totalAtCoordinate;
+      const radius = totalAtCoordinate > 1 ? 0.00009 : 0;
+      const markerLatitude = latitude + (Math.sin(angle) * radius);
+      const markerLongitude = longitude + (Math.cos(angle) * radius);
 
       const content = document.createElement("div");
       const name = document.createElement("strong");
@@ -1001,7 +1147,7 @@
       updated.textContent = location.updated_at_label || "";
       content.append(name, document.createElement("br"), updated);
 
-      const marker = window.L.marker([latitude, longitude]).addTo(map).bindPopup(content);
+      const marker = window.L.marker([markerLatitude, markerLongitude]).addTo(map).bindPopup(content);
       markers.push(marker);
     });
 
@@ -1124,6 +1270,7 @@
     setupToastButtons();
     setupPasswordToggles();
     setupChatbot();
+    setupNotifications();
     setupLocationTracker();
     setupAdminAccessMap();
     setupPwaInstall();

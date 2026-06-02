@@ -24,14 +24,12 @@ include __DIR__ . '/includes/header.php';
     <span class="title-badge"><?= sanitize($user['titulo']); ?></span>
 </section>
 
-<article class="card card-soft cta-card">
-    <h3>Não perca seu ritmo!</h3>
-    <p>Cadastre-se para salvar suas conquistas, figurinhas e roteiros personalizados.</p>
-    <button class="btn btn-primary btn-xl"><i class="fa-regular fa-user"></i> Cadastrar Agora</button>
-</article>
+<?php if (isAdminUser($user)): ?>
+    <a href="admin.php" class="btn btn-light btn-xl"><i class="fa-solid fa-shield-halved"></i> Ir para o administrador</a>
+<?php endif; ?>
 
 <section class="section-head">
-    <h3>Álbum de Figurinhas</h3>
+    <h3>Album de Figurinhas</h3>
     <span><?= count($collected); ?> / 24</span>
 </section>
 <div class="mini-sticker-grid">
@@ -99,14 +97,11 @@ include __DIR__ . '/includes/header.php';
             </div>
             <label>Nome</label>
             <input type="text" name="nome" value="<?= sanitize($user['nome']); ?>" required>
-            <label>Usuário</label>
+            <label>Usuario</label>
             <input type="text" name="usuario" value="<?= sanitize($user['usuario']); ?>" required>
-            <label>Título</label>
+            <label>Titulo</label>
             <input type="text" name="titulo" value="<?= sanitize($user['titulo']); ?>" required>
-            <button type="submit" class="btn btn-primary btn-xl">Salvar alterações</button>
-            <?php if (isAdminUser($user)): ?>
-                <a href="admin.php" class="btn btn-light btn-xl"><i class="fa-solid fa-shield-halved"></i> Abrir painel do administrador</a>
-            <?php endif; ?>
+            <button type="submit" class="btn btn-primary btn-xl">Salvar alteracoes</button>
         </form>
     </div>
 </div>

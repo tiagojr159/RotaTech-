@@ -39,12 +39,12 @@ $avatar = $current['avatar'] ?? 'assets/img/avatar-default.svg';
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
         <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <?php endif; ?>
-    <link rel="stylesheet" href="assets/css/style.css?v=1.0.15">
+    <link rel="stylesheet" href="assets/css/style.css?v=1.0.16">
     <script>
         window.APP_BASE_URL = "<?= sanitize(APP_BASE_URL); ?>";
         window.APP_ABSOLUTE_URL = "<?= sanitize(APP_ABSOLUTE_URL); ?>";
     </script>
-    <script defer src="assets/js/app.js?v=1.0.8"></script>
+    <script defer src="assets/js/app.js?v=1.0.9"></script>
 </head>
 <body class="<?= sanitize($bodyClass); ?>">
 <div class="app-shell">
@@ -82,5 +82,6 @@ $avatar = $current['avatar'] ?? 'assets/img/avatar-default.svg';
         <?php endif; ?>
         <main class="screen-content <?= sanitize($contentClass); ?>">
         <?php if ($current): ?>
+            <?php include __DIR__ . '/notification-widget.php'; ?>
             <?php include __DIR__ . '/chat-widget.php'; ?>
         <?php endif; ?>

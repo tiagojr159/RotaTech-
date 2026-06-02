@@ -49,6 +49,63 @@ if ($userIndex === null) {
 }
 
 switch ($action) {
+    case 'admin_chat_alert_poll':
+        if (!isAdminUser($current)) {
+            jsonResponse(['ok' => false, 'message' => 'Acesso restrito ao administrador.'], 403);
+        }
+
+        $alerts = readJson('admin_chat_alerts.json');
+        $deliveries = readJson('admin_chat_alert_deliveries.json');
+        $deliveredIds = [];
+        foreach ($deliveries as $delivery) {
+            if ((int) ($delivery['admin_user_id'] ?? 0) === (int) $current['id']) {
+                $deliveredIds[(int) ($delivery['alert_id'] ?? 0)] = true;
+            }
+        }
+
+        $recentLimit = time() - 30;
+        $pendingAlerts = [];
+        foreach ($alerts as $alert) {
+            $alertId = (int) ($alert['id'] ?? 0);
+            $createdAt = strtotime((string) ($alert['created_at'] ?? '')) ?: 0;
+            if ($alertId < 1 || $createdAt < $recentLimit || !empty($deliveredIds[$alertId])) {
+                continue;
+            }
+            $pendingAlerts[] = [
+                'id' => $alertId,
+                'user_name' => (string) ($alert['user_name'] ?? 'Visitante'),
+                'message' => (string) ($alert['message'] ?? ''),
+            ];
+        }
+
+        jsonResponse(['ok' => true, 'alerts' => $pendingAlerts]);
+        break;
+
+    case 'mark_admin_chat_alert_delivered':
+        if (!isAdminUser($current)) {
+            jsonResponse(['ok' => false, 'message' => 'Acesso restrito ao administrador.'], 403);
+        }
+
+        $alertId = (int) ($_POST['alert_id'] ?? 0);
+        if ($alertId < 1) {
+            jsonResponse(['ok' => false, 'message' => 'Alerta invalido.'], 422);
+        }
+
+        $deliveries = readJson('admin_chat_alert_deliveries.json');
+        foreach ($deliveries as $delivery) {
+            if ((int) ($delivery['admin_user_id'] ?? 0) === (int) $current['id'] && (int) ($delivery['alert_id'] ?? 0) === $alertId) {
+                jsonResponse(['ok' => true]);
+            }
+        }
+        $deliveries[] = [
+            'admin_user_id' => (int) $current['id'],
+            'alert_id' => $alertId,
+            'delivered_at' => date('c'),
+        ];
+        writeJson('admin_chat_alert_deliveries.json', array_slice($deliveries, -1000));
+        jsonResponse(['ok' => true]);
+        break;
+
     case 'notification_poll':
         $now = date('c');
         $presence = readJson('user_presence.json');

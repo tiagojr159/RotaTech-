@@ -396,6 +396,8 @@ function defaultDataMap(): array
         'notification_reads.json' => [],
         'notification_sound_deliveries.json' => [],
         'user_presence.json' => [],
+        'admin_chat_alerts.json' => [],
+        'admin_chat_alert_deliveries.json' => [],
         'convites.json' => [
             ['id' => 1, 'group_id' => 3, 'from_user_id' => 3, 'to_user_id' => 1, 'status' => 'pendente'],
             ['id' => 2, 'group_id' => 2, 'from_user_id' => 5, 'to_user_id' => 1, 'status' => 'pendente'],

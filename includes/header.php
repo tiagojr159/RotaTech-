@@ -39,12 +39,13 @@ $avatar = $current['avatar'] ?? 'assets/img/avatar-default.svg';
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
         <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <?php endif; ?>
-    <link rel="stylesheet" href="assets/css/style.css?v=1.0.16">
+    <link rel="stylesheet" href="assets/css/style.css?v=1.0.17">
     <script>
         window.APP_BASE_URL = "<?= sanitize(APP_BASE_URL); ?>";
         window.APP_ABSOLUTE_URL = "<?= sanitize(APP_ABSOLUTE_URL); ?>";
+        window.IS_ADMIN_USER = <?= isAdminUser($current) ? 'true' : 'false'; ?>;
     </script>
-    <script defer src="assets/js/app.js?v=1.0.9"></script>
+    <script defer src="assets/js/app.js?v=1.0.10"></script>
 </head>
 <body class="<?= sanitize($bodyClass); ?>">
 <div class="app-shell">

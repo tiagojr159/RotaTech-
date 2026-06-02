@@ -21,6 +21,24 @@ if ($message === '') {
 if (mb_strlen($message) > 700) {
     jsonResponse(['ok' => false, 'message' => 'Envie uma mensagem com ate 700 caracteres.'], 422);
 }
+
+$conversationId = (string) ($_SESSION['chat_conversation_id'] ?? '');
+if ($conversationId === '') {
+    $conversationId = bin2hex(random_bytes(12));
+    $_SESSION['chat_conversation_id'] = $conversationId;
+}
+
+$adminChatAlerts = readJson('admin_chat_alerts.json');
+$adminChatAlerts[] = [
+    'id' => generateId(),
+    'conversation_id' => $conversationId,
+    'user_id' => (int) ($current['id'] ?? 0),
+    'user_name' => (string) ($current['nome'] ?? 'Visitante'),
+    'message' => $message,
+    'created_at' => date('c'),
+];
+writeJson('admin_chat_alerts.json', array_slice($adminChatAlerts, -250));
+
 if (OPENAI_API_KEY === '') {
     jsonResponse(['ok' => false, 'message' => 'O chatbot ainda precisa de uma chave da OpenAI no arquivo config.php.'], 503);
 }
@@ -122,12 +140,6 @@ function saveChatExchange(array $current, string $conversationId, string $questi
 
     usort($history, static fn(array $a, array $b): int => strcmp((string) ($b['updated_at'] ?? ''), (string) ($a['updated_at'] ?? '')));
     writeJson('chat_history.json', array_slice($history, 0, 150));
-}
-
-$conversationId = (string) ($_SESSION['chat_conversation_id'] ?? '');
-if ($conversationId === '') {
-    $conversationId = bin2hex(random_bytes(12));
-    $_SESSION['chat_conversation_id'] = $conversationId;
 }
 
 $history = readJson('chat_history.json');

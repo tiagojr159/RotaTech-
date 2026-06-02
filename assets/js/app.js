@@ -1100,6 +1100,70 @@
     window.setInterval(refreshNotifications, 30000);
   };
 
+  const setupAdminChatAlerts = () => {
+    if (!window.IS_ADMIN_USER) return;
+
+    let audioContext = null;
+    const getAudioContext = () => {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return null;
+      audioContext ||= new AudioContext();
+      return audioContext;
+    };
+
+    const unlockAudio = () => {
+      const context = getAudioContext();
+      context?.resume?.().catch(() => {});
+    };
+    document.addEventListener("pointerdown", unlockAudio, { once: true });
+
+    const playAdminChatSound = async () => {
+      const context = getAudioContext();
+      if (!context) return false;
+      try {
+        await context.resume();
+        if (context.state !== "running") return false;
+
+        [0, 0.16, 0.32, 0.48].forEach((delay, index) => {
+          const oscillator = context.createOscillator();
+          const gain = context.createGain();
+          oscillator.type = "triangle";
+          oscillator.frequency.setValueAtTime(index % 2 === 0 ? 740 : 980, context.currentTime + delay);
+          gain.gain.setValueAtTime(0.0001, context.currentTime + delay);
+          gain.gain.exponentialRampToValueAtTime(0.24, context.currentTime + delay + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + delay + 0.13);
+          oscillator.connect(gain);
+          gain.connect(context.destination);
+          oscillator.start(context.currentTime + delay);
+          oscillator.stop(context.currentTime + delay + 0.15);
+        });
+        return true;
+      } catch (_) {
+        return false;
+      }
+    };
+
+    const pollAdminChatAlerts = async () => {
+      try {
+        const json = await postApi({ action: "admin_chat_alert_poll" });
+        const alerts = json.alerts || [];
+        if (!alerts.length) return;
+
+        const latestAlert = alerts[alerts.length - 1];
+        showToast(`Nova mensagem no chatbot: ${latestAlert.user_name}`);
+        if (!await playAdminChatSound()) return;
+
+        await Promise.all(alerts.map((alert) => postApi({
+          action: "mark_admin_chat_alert_delivered",
+          alert_id: String(alert.id),
+        }).catch(() => null)));
+      } catch (_) {}
+    };
+
+    pollAdminChatAlerts();
+    window.setInterval(pollAdminChatAlerts, 10000);
+  };
+
   const setupAdminAccessMap = () => {
     const element = $("[data-admin-access-map]");
     if (!element || !window.L) return;
@@ -1271,6 +1335,7 @@
     setupPasswordToggles();
     setupChatbot();
     setupNotifications();
+    setupAdminChatAlerts();
     setupLocationTracker();
     setupAdminAccessMap();
     setupPwaInstall();

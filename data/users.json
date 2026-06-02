@@ -88,5 +88,73 @@
             1,
             4
         ]
+    },
+    {
+        "id": 1780162616107,
+        "nome": "Tiago Junior",
+        "usuario": "tiago",
+        "email": "tiagojr159@hotmail.com",
+        "senha_hash": "$2y$10$XlEuVNCJxnw.9FThLfd7h.hLLDVvc5isG.C4ACbsiZVQhjpwpAK\/y",
+        "avatar": "uploads\/upload_1780162833_5151.jpg",
+        "nivel": 1,
+        "titulo": "NOVO FORROZEIRO",
+        "pontos": 0,
+        "criado_em": "2026-05-30",
+        "favoritos": [],
+        "figurinhas": [
+            1
+        ],
+        "is_admin": true
+    },
+    {
+        "id": 1780162675397,
+        "nome": "Alessandra de Santana Cardeal",
+        "usuario": "@alessandra",
+        "email": "alessandracardeal610@gmail.com",
+        "senha_hash": "$2y$10$QjjfqME9aYAZoQYToB9cGuIOLN3fZguE6Mk.PMJe5ygCyBt5gg8S2",
+        "avatar": "uploads\/upload_1780162696_5323.jpg",
+        "nivel": 1,
+        "titulo": "NOVO FORROZEIRO",
+        "pontos": 0,
+        "criado_em": "2026-05-30",
+        "favoritos": [],
+        "figurinhas": [
+            1
+        ],
+        "is_admin": true
+    },
+    {
+        "id": 1780163153824,
+        "nome": "José Joaquim dos Santos Filho",
+        "usuario": "Joacasantos",
+        "email": "joacasantos@gmail.com",
+        "senha_hash": "$2y$10$juYn6ZLUYtBjzOyhJAa7V.gOESr6VENN4cvNK4Kh5f70syTIRSVWG",
+        "avatar": "assets\/img\/avatar-default.svg",
+        "nivel": 1,
+        "titulo": "NOVO FORROZEIRO",
+        "pontos": 0,
+        "criado_em": "2026-05-30",
+        "favoritos": [],
+        "figurinhas": [
+            1
+        ],
+        "is_admin": false
+    },
+    {
+        "id": 1780167131589,
+        "nome": "Vandilma",
+        "usuario": "@vandilma",
+        "email": "teste@gmail.com",
+        "senha_hash": "$2y$10$Z\/z6dD66M9PuIn8S9qqHfuhpbc.BfhhDdA6lGdXaTf37cLFGTej0.",
+        "avatar": "assets\/img\/avatar-default.svg",
+        "nivel": 1,
+        "titulo": "NOVO FORROZEIRO",
+        "pontos": 0,
+        "criado_em": "2026-05-30",
+        "favoritos": [],
+        "figurinhas": [
+            1
+        ],
+        "is_admin": false
     }
 ]

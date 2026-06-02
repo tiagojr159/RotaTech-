@@ -49,6 +49,45 @@ if ($userIndex === null) {
 }
 
 switch ($action) {
+    case 'registrar_localizacao':
+        $latitude = filter_var($_POST['latitude'] ?? null, FILTER_VALIDATE_FLOAT);
+        $longitude = filter_var($_POST['longitude'] ?? null, FILTER_VALIDATE_FLOAT);
+        $precisao = filter_var($_POST['precisao'] ?? null, FILTER_VALIDATE_FLOAT);
+
+        if ($latitude === false || $longitude === false || $latitude < -90 || $latitude > 90 || $longitude < -180 || $longitude > 180) {
+            jsonResponse(['ok' => false, 'message' => 'Localizacao invalida.'], 422);
+        }
+
+        $locations = readJson('user_locations.json');
+        $locationIndex = null;
+        foreach ($locations as $index => $location) {
+            if ((int) ($location['user_id'] ?? 0) === (int) $current['id']) {
+                $locationIndex = $index;
+                break;
+            }
+        }
+
+        $payload = [
+            'user_id' => (int) $current['id'],
+            'user_name' => (string) ($current['nome'] ?? 'Visitante'),
+            'user_avatar' => (string) ($current['avatar'] ?? 'assets/img/avatar-default.svg'),
+            'latitude' => round((float) $latitude, 7),
+            'longitude' => round((float) $longitude, 7),
+            'precisao' => $precisao === false ? null : round((float) $precisao, 1),
+            'updated_at' => date('c'),
+        ];
+
+        if ($locationIndex === null) {
+            $payload['created_at'] = date('c');
+            $locations[] = $payload;
+        } else {
+            $locations[$locationIndex] = array_merge($locations[$locationIndex], $payload);
+        }
+
+        writeJson('user_locations.json', $locations);
+        jsonResponse(['ok' => true, 'message' => 'Localizacao registrada.']);
+        break;
+
     case 'criar_grupo':
         $nome = sanitize($_POST['nome'] ?? '');
         $privacidade = sanitize($_POST['privacidade'] ?? 'publico');

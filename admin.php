@@ -7,7 +7,7 @@ requireAdmin();
 $message = '';
 $error = '';
 $activeAdminTab = sanitize($_POST['admin_tab'] ?? $_GET['tab'] ?? 'hospedagem');
-if (!in_array($activeAdminTab, ['usuarios', 'hospedagem', 'restaurantes', 'eventos', 'relatorios', 'album'], true)) {
+if (!in_array($activeAdminTab, ['usuarios', 'hospedagem', 'restaurantes', 'eventos', 'relatorios', 'album', 'conversas', 'localizacoes'], true)) {
     $activeAdminTab = 'hospedagem';
 }
 
@@ -19,6 +19,8 @@ $albumFotos = readJson('album_fotos.json');
 $roteiros = readJson('roteiros.json');
 $grupos = readJson('grupos.json');
 $convites = readJson('convites.json');
+$chatHistory = readJson('chat_history.json');
+$userLocations = readJson('user_locations.json');
 
 $nextId = static function (array $rows): int {
     $max = 0;
@@ -297,8 +299,21 @@ $topEventos = $report['topEventos'];
 $usuariosComFotos = $report['usuariosComFotos'];
 $usuariosComRoteiro = $report['usuariosComRoteiro'];
 $usuariosEngajados = $report['usuariosEngajados'];
+$formatDateTime = static function (string $value): string {
+    $timestamp = strtotime($value);
+    return $timestamp === false ? $value : date('d/m/Y H:i', $timestamp);
+};
+$locationsForMap = array_map(static function (array $location) use ($formatDateTime): array {
+    return [
+        'user_name' => (string) ($location['user_name'] ?? 'Visitante'),
+        'latitude' => (float) ($location['latitude'] ?? 0),
+        'longitude' => (float) ($location['longitude'] ?? 0),
+        'updated_at_label' => $formatDateTime((string) ($location['updated_at'] ?? '')),
+    ];
+}, $userLocations);
 
 $showTopBar = true;
+$loadLeaflet = true;
 $backUrl = 'home.php';
 $pageTitle = 'Administrador';
 $pageEyebrow = 'painel';
@@ -319,6 +334,8 @@ include __DIR__ . '/includes/header.php';
         <a href="admin.php?tab=restaurantes" class="admin-tab-btn <?= $activeAdminTab === 'restaurantes' ? 'active' : ''; ?>"><i class="fa-solid fa-utensils"></i><span>Restaurantes</span></a>
         <a href="admin.php?tab=eventos" class="admin-tab-btn <?= $activeAdminTab === 'eventos' ? 'active' : ''; ?>"><i class="fa-solid fa-calendar-days"></i><span>Eventos</span></a>
         <a href="admin.php?tab=album" class="admin-tab-btn <?= $activeAdminTab === 'album' ? 'active' : ''; ?>"><i class="fa-solid fa-images"></i><span>Fotos da galera</span></a>
+        <a href="admin.php?tab=conversas" class="admin-tab-btn <?= $activeAdminTab === 'conversas' ? 'active' : ''; ?>"><i class="fa-solid fa-comments"></i><span>Historico do chatbot</span></a>
+        <a href="admin.php?tab=localizacoes" class="admin-tab-btn <?= $activeAdminTab === 'localizacoes' ? 'active' : ''; ?>"><i class="fa-solid fa-map-location-dot"></i><span>Mapa de acessos</span></a>
         <a href="admin.php?tab=relatorios" class="admin-tab-btn <?= $activeAdminTab === 'relatorios' ? 'active' : ''; ?>"><i class="fa-solid fa-chart-line"></i><span>Relatorio</span></a>
     </nav>
 
@@ -512,6 +529,77 @@ include __DIR__ . '/includes/header.php';
                 <i class="fa-regular fa-image"></i>
                 <h4>Nenhuma foto no album</h4>
                 <p>As fotos enviadas pelos usuarios vao aparecer aqui para moderacao.</p>
+            </article>
+        <?php endif; ?>
+    </section>
+
+    <section class="admin-section <?= $activeAdminTab === 'conversas' ? '' : 'hidden'; ?>">
+        <div class="section-head admin-section-head">
+            <div>
+                <h3>Historico do chatbot</h3>
+                <p class="muted"><?= count($chatHistory); ?> conversas registradas pelo guia turistico.</p>
+            </div>
+        </div>
+        <div class="admin-chat-list">
+            <?php foreach ($chatHistory as $conversation): ?>
+                <article class="card admin-chat-card">
+                    <header>
+                        <strong><?= sanitize((string) ($conversation['user_name'] ?? 'Visitante')); ?></strong>
+                        <small>Atualizada em <?= sanitize($formatDateTime((string) ($conversation['updated_at'] ?? ''))); ?></small>
+                    </header>
+                    <div class="admin-chat-transcript">
+                        <?php foreach (($conversation['messages'] ?? []) as $chatMessage): ?>
+                            <?php $chatRole = ($chatMessage['role'] ?? '') === 'assistant' ? 'assistant' : 'user'; ?>
+                            <p class="admin-chat-message <?= $chatRole; ?>">
+                                <strong><?= $chatRole === 'assistant' ? 'Guia' : 'Turista'; ?>:</strong>
+                                <?= sanitize((string) ($chatMessage['content'] ?? '')); ?>
+                            </p>
+                        <?php endforeach; ?>
+                    </div>
+                </article>
+            <?php endforeach; ?>
+        </div>
+        <?php if (empty($chatHistory)): ?>
+            <article class="empty-card">
+                <i class="fa-regular fa-comments"></i>
+                <h4>Nenhuma conversa registrada</h4>
+                <p>As mensagens trocadas com o guia turistico vao aparecer aqui.</p>
+            </article>
+        <?php endif; ?>
+    </section>
+
+    <section class="admin-section <?= $activeAdminTab === 'localizacoes' ? '' : 'hidden'; ?>">
+        <div class="section-head admin-section-head">
+            <div>
+                <h3>Mapa de acessos</h3>
+                <p class="muted"><?= count($userLocations); ?> usuarios compartilharam a localizacao pelo navegador.</p>
+            </div>
+        </div>
+        <div
+            class="admin-access-map"
+            data-admin-access-map
+            data-locations="<?= sanitize((string) json_encode($locationsForMap, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)); ?>"
+        ></div>
+        <div class="admin-location-list">
+            <?php foreach ($userLocations as $location): ?>
+                <article class="card admin-location-item">
+                    <img src="<?= sanitize((string) ($location['user_avatar'] ?? 'assets/img/avatar-default.svg')); ?>" alt="">
+                    <div>
+                        <strong><?= sanitize((string) ($location['user_name'] ?? 'Visitante')); ?></strong>
+                        <small>
+                            <?= sanitize((string) ($location['latitude'] ?? '')); ?>,
+                            <?= sanitize((string) ($location['longitude'] ?? '')); ?>
+                            - <?= sanitize($formatDateTime((string) ($location['updated_at'] ?? ''))); ?>
+                        </small>
+                    </div>
+                </article>
+            <?php endforeach; ?>
+        </div>
+        <?php if (empty($userLocations)): ?>
+            <article class="empty-card">
+                <i class="fa-solid fa-location-dot"></i>
+                <h4>Nenhuma localizacao recebida</h4>
+                <p>Os pontos vao aparecer quando os usuarios autorizarem a localizacao no navegador.</p>
             </article>
         <?php endif; ?>
     </section>

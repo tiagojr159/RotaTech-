@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta name="keywords" content="chatbot, hospital, treatment" />
+  <meta name="description" content="Chatbot para assistência em tratamentos hospitalares" />
+  <meta name="author" content="Seu Nome" />
+
+  <title>Chatbot - CicloVida</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <!-- Owl Carousel -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" />
+  <!-- Nice Select -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-nice-select/1.1.0/css/nice-select.min.css" integrity="sha256-mLBIhmBvigTFWPSCtvdu6a76T+3Xyt+K571hupeFLg4=" crossorigin="anonymous" />
+  <!-- Datepicker -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.3.0/css/datepicker.css">
+  <!-- Axios -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+  <!-- Custom CSS -->
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      color: #333;
+      background-color: #f4f7fa;
+    }
+
+    .hero_area {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header Placeholder */
+    #header-placeholder {
+      background-color: #007bff;
+      padding: 15px 0;
+      color: white;
+      text-align: center;
+    }
+
+    /* Treatment Section */
+    .treatment_section {
+      padding: 60px 0;
+    }
+
+    .heading_container h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .heading_container h2 span {
+      color: #20c997;
+    }
+
+    .heading_container p {
+      font-size: 1.1rem;
+      color: #666;
+      margin-bottom: 40px;
+    }
+
+    .box {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      transition: transform 0.3s;
+      text-align: center;
+      padding-bottom: 20px;
+    }
+
+    .box:hover {
+      transform: translateY(-10px);
+    }
+
+    .img-box img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-bottom: 2px solid #20c997;
+    }
+
+    .detail-box {
+      padding: 20px;
+    }
+
+    .detail-box h4 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 15px;
+    }
+
+    .detail-box p {
+      font-size: 0.95rem;
+      color: #666;
+    }
+
+    /* Chatbot Section */
+    .chatbot-section {
+      background-color: #fff;
+      padding: 60px 0;
+    }
+
+    .chat-window {
+      max-height: 400px;
+      overflow-y: auto;
+      background-color: #f8f9fa;
+      border-radius: 10px;
+      padding: 15px;
+    }
+
+    .chat-message.user .chat-bubble {
+      background-color: #007bff;
+      color: white;
+      text-align: right;
+      margin-left: 20%;
+      padding: 10px 15px;
+      border-radius: 10px 10px 0 10px;
+      margin-bottom: 10px;
+    }
+
+    .chat-message.bot .chat-bubble {
+      background-color: #e9ecef;
+      color: black;
+      text-align: left;
+      margin-right: 20%;
+      padding: 10px 15px;
+      border-radius: 0 10px 10px 0;
+      margin-bottom: 10px;
+    }
+
+    .btn-teal {
+      background-color: #20c997;
+      color: white;
+      padding: 8px 20px;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+
+    .btn-teal:hover {
+      background-color: #17a589;
+    }
+
+    .rounded-start-pill {
+      border-top-left-radius: 50rem;
+      border-bottom-left-radius: 50rem;
+    }
+
+    .rounded-end-pill {
+      border-top-right-radius: 50rem;
+      border-bottom-right-radius: 50rem;
+    }
+
+    /* Footer Section */
+    .footer_section {
+      background-color: #333;
+      color: white;
+      padding: 20px 0;
+      text-align: center;
+      margin-top: auto;
+    }
+
+    .footer_section p {
+      margin: 0;
+      font-size: 0.9rem;
+    }
+
+    .footer_section a {
+      color: #20c997;
+      text-decoration: none;
+    }
+
+    .footer_section a:hover {
+      text-decoration: underline;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .treatment_section {
+        padding: 40px 0;
+      }
+
+      .heading_container h2 {
+        font-size: 2rem;
+      }
+
+      .box {
+        margin-bottom: 20px;
+      }
+
+      .chat-window {
+        max-height: 300px;
+      }
+
+      .chat-input-group input {
+        width: 65% !important;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .quick-questions button {
+        flex: 1 1 100%;
+        margin: 5px 0;
+      }
+
+      .chat-input-group input {
+        width: 60% !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="hero_area">
+    <!-- Header section -->
+    <div id="header-placeholder"></div>
+    <!-- end header section -->
+
+   
+
+    <!-- Chatbot Section -->
+    <section class="chatbot-section py-5">
+      <div class="container">
+        <div class="text-center mb-4">
+          <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="Avatar" class="rounded-circle" style="width: 80px;">
+          <h5 class="mt-3">Olá! Sou sua assistente virtual CHATGPT. Como posso ajudar?</h5>
+        </div>
+
+        <!-- Chat Window -->
+        <div id="chat-window" class="chat-window mb-4 p-3 border rounded"></div>
+
+        <!-- Quick Questions -->
+        <div class="quick-questions d-flex flex-wrap justify-content-center mb-3">
+          <button class="btn btn-teal m-2" data-message="Integração logística">Integração logística</button>
+          <button class="btn btn-teal m-2" data-message="Doação segura">Doação segura</button>
+          <button class="btn btn-teal m-2" data-message="Destinação correta">Destinação correta</button>
+          <button class="btn btn-teal m-2" data-message="Engajamento comunitário">Engajamento comunitário</button>
+        </div>
+
+        <!-- Chat Input -->
+        <form id="chat-form" class="chat-input-group d-flex justify-content-center">
+          <input id="user-input" type="text" class="form-control w-75 rounded-start-pill" placeholder="Pergunte alguma coisa..." aria-label="Mensagem do usuário">
+          <button id="send-btn" type="submit" class="btn btn-primary rounded-end-pill" style="background-color: #007bff;">
+            <i class="fa fa-paper-plane" aria-hidden="true"></i>
+          </button>
+        </form>
+      </div>
+    </section>
+   
+   
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-nice-select/1.1.0/js/jquery.nice-select.min.js" integrity="sha256-Zr3vByTlMGQhvMfgkQ5BtWRSKBGa2QlspKYJnkjZTmo=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.3.0/js/bootstrap-datepicker.js"></script>
+  <script src="js/custom.js"></script>
+
+  <script>
+    // Display logged-in user
+    const usuarioLogado = localStorage.getItem('usuarioLogado');
+    const labelUsuario = document.getElementById('labelUsuario');
+    if (usuarioLogado) {
+      try {
+        const user = JSON.parse(usuarioLogado);
+        labelUsuario.textContent = `Usuário: ${user.documento || 'Desconhecido'}`;
+      } catch (e) {
+        labelUsuario.textContent = 'Erro ao carregar usuário';
+      }
+    } else {
+      labelUsuario.textContent = 'Usuário não logado';
+    }
+
+    // Update footer year
+    document.getElementById('displayYear').textContent = new Date().getFullYear();
+  </script>
+
+  <script>
+    const chatWindow = document.getElementById('chat-window');
+    const chatForm = document.getElementById('chat-form');
+    const userInput = document.getElementById('user-input');
+    const quickButtons = document.querySelectorAll('.quick-questions button');
+
+    // Append message to chat window
+    function appendMessage(sender, text) {
+  const chatBox = document.getElementById('chat-window'); // certifique-se que é o ID correto
+
+  const messageElem = document.createElement('div');
+  messageElem.className = `chat-message ${sender}`;
+
+  const bubble = document.createElement('div');
+  bubble.className = 'chat-bubble';
+
+  // Verifica se o texto é tabela
+  if (text.includes('||') && text.includes('|')) {
+    bubble.innerHTML = gerarTabelaHTML(text); // insere a tabela como HTML
+  } else {
+    bubble.textContent = text;
+  }
+
+  messageElem.appendChild(bubble);
+  chatBox.appendChild(messageElem);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+    // Send message to backend
+    async function sendMessage(text) {
+      if (!text.trim()) return;
+
+      appendMessage('user', text);
+      userInput.value = ''; 
+
+      try {
+        const response = await axios.post('chat.php', { message: text }, {
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const reply = response.data.reply || 'Sem resposta do servidor.';
+        appendMessage('bot', reply);
+      } catch (error) {
+        console.error('Erro na requisição:', error);
+        appendMessage('bot', 'Erro ao comunicar com o servidor. Tente novamente.');
+      }
+    }
+
+    // Form submit handler
+    chatForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      sendMessage(userInput.value);
+    });
+
+
+function gerarTabelaHTML(texto) {
+  const linhas = texto
+    .split('||')
+    .map(l => l.trim())
+    .filter(Boolean);
+
+  if (linhas.length === 0) return texto;
+
+  const tabela = document.createElement('table');
+  tabela.className = 'table table-bordered table-sm';
+  tabela.style.width = '100%';
+  tabela.style.borderCollapse = 'collapse';
+  tabela.style.marginTop = '10px';
+  tabela.style.fontSize = '0.95rem';
+
+  linhas.forEach((linha, index) => {
+    const tr = document.createElement('tr');
+    const colunas = linha.split('|').map(c => c.trim()).filter(Boolean);
+
+    colunas.forEach(col => {
+      const celula = document.createElement(index === 0 ? 'th' : 'td');
+      celula.style.border = '1px solid #ccc';
+      celula.style.padding = '8px';
+      celula.style.textAlign = 'left';
+      celula.innerHTML = col;
+      tr.appendChild(celula);
+    });
+
+    tabela.appendChild(tr);
+  });
+
+  return tabela.outerHTML;
+}
+
+
+    // Quick buttons handler
+    quickButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const message = button.getAttribute('data-message');
+        sendMessage(message);
+      });
+    });
+  </script>
+  <script src="js/headerLoader.js" defer></script>  
+</body>
+</html>

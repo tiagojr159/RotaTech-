@@ -881,6 +881,136 @@
     });
   };
 
+  const setupChatbot = () => {
+    const widget = $("[data-chatbot-widget]");
+    if (!widget) return;
+
+    const panel = $("[data-chatbot-panel]", widget) || $("#chatbot-panel", widget);
+    const toggle = $("[data-chatbot-toggle]", widget);
+    const close = $("[data-chatbot-close]", widget);
+    const form = $("[data-chatbot-form]", widget);
+    const messages = $("[data-chatbot-messages]", widget);
+    const input = $('input[name="message"]', widget);
+    if (!panel || !toggle || !form || !messages || !input) return;
+
+    const setOpen = (open) => {
+      panel.classList.toggle("hidden", !open);
+      toggle.setAttribute("aria-expanded", String(open));
+      if (open) input.focus();
+    };
+
+    const appendMessage = (text, sender) => {
+      const message = document.createElement("p");
+      message.className = `chatbot-message ${sender}`;
+      message.textContent = text;
+      messages.appendChild(message);
+      messages.scrollTop = messages.scrollHeight;
+      return message;
+    };
+
+    toggle.addEventListener("click", () => {
+      setOpen(panel.classList.contains("hidden"));
+    });
+    close?.addEventListener("click", () => setOpen(false));
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const text = input.value.trim();
+      if (!text) return;
+
+      appendMessage(text, "user");
+      input.value = "";
+      input.disabled = true;
+      const loading = appendMessage("Consultando...", "bot loading");
+
+      try {
+        const response = await fetch("chat.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: text }),
+        });
+        const json = await response.json();
+        if (!response.ok || json.ok === false) {
+          throw new Error(json.message || "Nao foi possivel consultar o guia.");
+        }
+        loading.textContent = json.reply;
+        loading.classList.remove("loading");
+      } catch (error) {
+        loading.textContent = error.message || "Nao foi possivel consultar o guia agora.";
+        loading.classList.remove("loading");
+      } finally {
+        input.disabled = false;
+        input.focus();
+      }
+    });
+  };
+
+  const setupLocationTracker = () => {
+    if (!$("[data-location-tracker]") || !navigator.geolocation) return;
+
+    const storageKey = "rotatech-location-saved-at";
+    try {
+      const lastSavedAt = Number(localStorage.getItem(storageKey) || 0);
+      if (Date.now() - lastSavedAt < 15 * 60 * 1000) return;
+    } catch (_) {}
+
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      try {
+        await postApi({
+          action: "registrar_localizacao",
+          latitude: String(position.coords.latitude),
+          longitude: String(position.coords.longitude),
+          precisao: String(position.coords.accuracy || ""),
+        });
+        try {
+          localStorage.setItem(storageKey, String(Date.now()));
+        } catch (_) {}
+      } catch (_) {}
+    }, () => {}, {
+      enableHighAccuracy: false,
+      timeout: 10000,
+      maximumAge: 5 * 60 * 1000,
+    });
+  };
+
+  const setupAdminAccessMap = () => {
+    const element = $("[data-admin-access-map]");
+    if (!element || !window.L) return;
+
+    let locations = [];
+    try {
+      locations = JSON.parse(element.dataset.locations || "[]");
+    } catch (_) {}
+
+    const map = window.L.map(element).setView([-8.4333, -37.0667], 14);
+    window.L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: "&copy; OpenStreetMap",
+    }).addTo(map);
+
+    const markers = [];
+    locations.forEach((location) => {
+      const latitude = Number(location.latitude);
+      const longitude = Number(location.longitude);
+      if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return;
+
+      const content = document.createElement("div");
+      const name = document.createElement("strong");
+      const updated = document.createElement("small");
+      name.textContent = location.user_name || "Visitante";
+      updated.textContent = location.updated_at_label || "";
+      content.append(name, document.createElement("br"), updated);
+
+      const marker = window.L.marker([latitude, longitude]).addTo(map).bindPopup(content);
+      markers.push(marker);
+    });
+
+    if (markers.length) {
+      const group = window.L.featureGroup(markers);
+      map.fitBounds(group.getBounds().pad(0.25), { maxZoom: 16 });
+    }
+  };
+
   const setupPwaInstall = () => {
     const appBaseUrl = getAppBaseUrl();
     const postInstallUrl = getAppAbsoluteUrl();
@@ -993,6 +1123,9 @@
     setupProfileEdit();
     setupToastButtons();
     setupPasswordToggles();
+    setupChatbot();
+    setupLocationTracker();
+    setupAdminAccessMap();
     setupPwaInstall();
   });
 })();

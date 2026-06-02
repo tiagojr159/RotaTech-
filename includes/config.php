@@ -34,6 +34,15 @@ define('ASSETS_PATH', BASE_PATH . DIRECTORY_SEPARATOR . 'assets');
 define('APP_NAME', 'RotaTech Arcoverde');
 define('MASTER_USER_EMAIL', 'tiagojr159@hotmail.com');
 
+$localConfigPath = BASE_PATH . DIRECTORY_SEPARATOR . 'config.php';
+$localConfig = file_exists($localConfigPath) ? require $localConfigPath : [];
+if (!is_array($localConfig)) {
+    $localConfig = [];
+}
+
+define('OPENAI_API_KEY', trim((string) ($localConfig['openai_api_key'] ?? getenv('OPENAI_API_KEY') ?: '')));
+define('OPENAI_MODEL', trim((string) ($localConfig['openai_model'] ?? 'gpt-5.4-mini')));
+
 function detectAppBaseUrl(): string
 {
     $scriptName = str_replace('\\', '/', (string) ($_SERVER['SCRIPT_NAME'] ?? '/'));
@@ -382,6 +391,8 @@ function defaultDataMap(): array
             ['id' => 8, 'titulo' => 'Show Assistido', 'descricao' => 'Música ao vivo curtida.', 'imagem' => 'assets/img/sticker-show.svg', 'categoria' => 'show', 'desbloqueada' => false, 'progresso' => 0],
         ],
         'album_fotos.json' => [],
+        'chat_history.json' => [],
+        'user_locations.json' => [],
         'convites.json' => [
             ['id' => 1, 'group_id' => 3, 'from_user_id' => 3, 'to_user_id' => 1, 'status' => 'pendente'],
             ['id' => 2, 'group_id' => 2, 'from_user_id' => 5, 'to_user_id' => 1, 'status' => 'pendente'],
